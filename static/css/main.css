@@ -1,0 +1,81 @@
+html {
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    margin: 0;
+    font-size: 16px;
+}
+
+h1, h2, h3, h4, p, blockquote, figure, ol, ul {
+    margin: 0;
+    padding: 0;
+}
+
+li {
+    display: block;
+}
+
+h1, h2, h3, h4 {
+    font-size: inherit;
+}
+
+a {
+    text-decoration: none;
+    color: blue;
+    -webkit-transition: .3s;
+    -moz-transition: .3s;
+    transition: .3s;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    border: 0;
+}
+
+
+@import url(http://fonts.googleapis.com/css?family=Lato);
+body {
+  font-family: 'Lato', sans-serif;
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
+}
+
+#sidebar{
+  position: absolute;
+  height: 25%;
+  width: 10%;
+  top: 37.5%;
+  left: 0px;
+  background: #aaa;
+}
+
+#sidebar ul {
+  text-align: right;
+  padding-right: 5px;
+}
+
+#sidebar h1 {
+  text-align: center;
+  font-size: 24;
+  padding-bottom: 5px;
+}
+
+
+
+#main{
+  position: absolute;
+  height:100%;
+  top:0px;
+  right:0px;
+  width: 90%;
+  background: #bbb;
+  
+}
