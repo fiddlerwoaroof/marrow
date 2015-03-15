@@ -44,6 +44,8 @@ body {
   box-sizing: border-box;
 }
 
+
+
 a {
   text-decoration: none;
 }
@@ -67,37 +69,94 @@ a {
   left:25%;
 }
 
-#sidebar{
-  position: absolute;
-  height: 25%;
-  width: 10%;
-  top: 37.5%;
-  left: 0px;
-}
-
-#sidebar ul {
-  text-align: right;
-  padding-right: 5px;
-}
-
 #sidebar h1 {
   text-align: center;
   font-size: 24;
   padding-bottom: 5px;
 }
 
-#main{
-  padding-left: 10px;
-  padding-top: 50px;
-  position: absolute;
-  height:100%;
-  top:0px;
-  right:0px;
-  width: 90%;
+#main h2 {
+  padding-bottom: 3px;
+  font-size: 14;
+  padding-left: 50px;
 }
-
 #main ul {
   position:relative;
 }
 
-#main ul 
+#main form {
+  padding-top: 5px;
+  width: 350px;
+}
+#main form input{
+  width: 100%;
+}
+
+@media (min-device-width: 443px) {
+
+  #sidebar{
+    position: absolute;
+    height: 25%;
+    width: 10%;
+    top: 15%;
+    left: 0px;
+  }
+
+  #main{
+    padding-left: 10px;
+    padding-top: 50px;
+    position: absolute;
+    height:100%;
+    top:0px;
+    right:0px;
+    width: 80%;
+    font-size: 140%;
+  }
+
+  #sidebar ul {
+    text-align: right;
+    padding-right: 5px;
+  }
+
+
+}
+
+@media (max-device-width: 443px) {
+  body {
+    padding-left: 5px;
+  }
+
+  #sidebar {
+    position: absolute;
+    height:70px;
+    background:#fff;
+    width: 100%;
+    top: 0px;
+  }
+
+  #sidebar ul {
+    position: relative;
+    display: block;
+    clear: both;
+    width: 100%;
+  }
+
+  #sidebar ul li {
+    display: inline;
+    background: #aaa;
+    padding: 5px;
+  }
+
+  #main {
+    position: absolute;
+    overflow-y: scroll;
+    width: 100%;
+    top: 75px;
+  }
+
+  # main ul li {
+    min-height: 50px;
+    background: black;
+  }
+}
+
