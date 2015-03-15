@@ -24,10 +24,12 @@ def submit_link():
 @bone_blueprint.route('',defaults={'username':None}, methods=['GET'])
 @bone_blueprint.route('/u/<username>', methods=['GET'])
 def data(username):
+    sectionTitle = username
     if username is None and 'username' in session:
         username = session['username']
+        sectionTitle = 'My Links'
 
-    result = {'marrow':[]}
+    result = {'marrow':[], 'sectionTitle': sectionTitle}
     with database.get_db().cursor() as cur:
         cur.execute("SELECT url, title, posted from get_bone(%s);", (username,))
         result['marrow'] = [
@@ -40,7 +42,7 @@ def data(username):
 @bone_blueprint.route('/subscriptions')
 def subscriptions():
     username = None
-    result = {'marrow':[]}
+    result = {'marrow':[], 'sectionTitle': 'Subscriptions'}
     if 'username' in session:
         username = session['username']
         with database.get_db().cursor() as cur:
@@ -50,20 +52,6 @@ def subscriptions():
                         for url,title,posted
                         in cur.fetchall()
             ]
-    return json.dumps(result)
-
-def data(username):
-    if username is None and 'username' in session:
-        username = session['username']
-
-    result = {'marrow':[]}
-    with database.get_db().cursor() as cur:
-        cur.execute("SELECT url, title, posted from get_bone(%s);", (username,))
-        result['marrow'] = [
-                dict(url=url,title=title,posted=posted.isoformat())
-                    for url,title,posted
-                    in cur.fetchall()
-        ]
     return json.dumps(result)
 
 import random
