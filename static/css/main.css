@@ -48,13 +48,31 @@ a {
   text-decoration: none;
 }
 
+.hidden {
+  display: none;
+}
+
+#login_form {
+  z-index: 100;
+  background: white;
+  position: absolute;
+  height:100%;
+  width:100%;
+  top: 0px;
+  left: 0px;
+}
+#login_form form {
+  position: absolute;
+  top:25%;
+  left:25%;
+}
+
 #sidebar{
   position: absolute;
   height: 25%;
   width: 10%;
   top: 37.5%;
   left: 0px;
-  background: #aaa;
 }
 
 #sidebar ul {
@@ -68,14 +86,18 @@ a {
   padding-bottom: 5px;
 }
 
-
-
 #main{
+  padding-left: 10px;
+  padding-top: 50px;
   position: absolute;
   height:100%;
   top:0px;
   right:0px;
   width: 90%;
-  background: #bbb;
-  
 }
+
+#main ul {
+  position:relative;
+}
+
+#main ul 

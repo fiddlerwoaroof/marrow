@@ -3,3 +3,8 @@ bower_components
 include
 lib
 local
+*.pyc
+.*.swp
+share
+pip-selfcheck.json
+src.twisted

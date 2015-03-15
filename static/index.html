@@ -7,6 +7,15 @@
   <link rel="stylesheet" href="/css/main.css" media="screen" />
 </head>
 <body>
+  <div id="login_form">
+    <div class="message"></div>
+    <form data-bind="submit: login.login">
+      <input type="text" name="username" placeholder="Username" data-bind="value: login.username" />
+      <input type="text" name="password" placeholder="Password" data-bind="value: login.password" />
+      <button type="submit" >Log In</button>
+      <button data-bind="click: login.newuser">Add User</button>
+    </form>
+  </div>
   <div class="container">
     <section id="main">
       <ul data-bind='foreach: marrow'>
@@ -21,7 +30,8 @@
       <ul>
         <li><a href="/">Home</a></li>
         <li><a href="/mylists">My Lists</a></li>
-        <li><a href="/random">Random</a></li>
+        <li><a href="#" data-bind="click: random">Random</a></li>
+        <li><a href="/api/user/logout?to=/">Log Out</a></li>
       </ul>
     </section>
   </div>
