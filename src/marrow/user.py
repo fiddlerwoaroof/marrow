@@ -47,9 +47,10 @@ def subscribe(username):
         db.commit()
         return json.dumps(True)
 
-@user_blueprint.route('/list')
-def list_users():
-    return json.dumps([_ for _ in users.keys()])
+# NOTE: disabled to to privacy/security concerns
+# @user_blueprint.route('/list')
+# def list_users():
+#     return json.dumps([_ for _ in users.keys()])
 
 @user_blueprint.route('/add', methods=['POST'])
 def adduser():
