@@ -31,9 +31,5 @@ def get_feeds(filename):
 def index():
     return 'Hello World'
 
-@app.route('/humans.txt')
-def humans():
-    return 'blah'
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0')

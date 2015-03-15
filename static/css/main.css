@@ -88,11 +88,11 @@ a {
   padding-top: 5px;
   width: 350px;
 }
-#main form input{
-  width: 100%;
+#main form input[type="text"]{
+  width: 315px;
 }
 
-@media (min-device-width: 443px) {
+@media (min-width: 443px) {
 
   #sidebar{
     position: absolute;
@@ -110,7 +110,6 @@ a {
     top:0px;
     right:0px;
     width: 80%;
-    font-size: 140%;
   }
 
   #sidebar ul {
@@ -121,7 +120,7 @@ a {
 
 }
 
-@media (max-device-width: 443px) {
+@media (max-width: 443px) {
   body {
     padding-left: 5px;
   }

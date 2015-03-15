@@ -87,6 +87,22 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+DROP FUNCTION IF EXISTS follows(text,text);
+CREATE OR REPLACE FUNCTION follows(fro text, to_ text)
+  RETURNS bool
+AS $$
+DECLARE
+  froid int;
+  toid int;
+  result bool;
+BEGIN
+  SELECT id INTO froid FROM users WHERE name = fro;
+  SELECT id INTO toid FROM users WHERE name = to_;
+  SELECT INTO result exists(SELECT 1 FROM user_subscriptions WHERE fro_id=froid and to_id=toid);
+  RETURN result;
+END
+$$ LANGUAGE plpgsql;
+
 
 DROP FUNCTION IF EXISTS put_link(text,text,text);
 DROP FUNCTION IF EXISTS put_link(text,text,text,timestamp);
@@ -131,4 +147,5 @@ BEGIN
   RETURN result;
 END
 $$ LANGUAGE plpgsql;
+
 

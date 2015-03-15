@@ -5,6 +5,7 @@ import json
 
 bone_blueprint = Blueprint('bone', __name__)
 
+@bone_blueprint.route('/add', methods=['POST'])
 @bone_blueprint.route('/submit', methods=['POST'])
 def submit_link():
     result = False
@@ -38,6 +39,18 @@ def data(username):
                     in cur.fetchall()
         ]
     return json.dumps(result)
+
+@bone_blueprint.route('/subscribe', methods=['POST'])
+def subscribe():
+    data = request.get_json()
+    if 'username' in session:
+        fro_user = session['username']
+        to_user = data['to']
+        db = database.get_db()
+        with db.cursor() as cur:
+            cur.callproc('subscribe', (fro_user,to_user))
+            db.commit()
+            return json.dumps(True)
 
 @bone_blueprint.route('/subscriptions')
 def subscriptions():
