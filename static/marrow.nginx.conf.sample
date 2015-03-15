@@ -1,0 +1,32 @@
+server {
+  listen 80;
+  listen [::]:80;
+  server_name marrow.example.org; ### Change this name to your dns name
+  access_log /var/log/nginx/marrow.access.log;
+  error_log /var/log/nginx/marrow.error.log;
+
+  root /path/to/marrow/static;
+  index index.html;
+
+
+  location / {
+    # pass unrecognized urls for index.html
+    # angularJS will handle the routing of most of these
+    try_files $uri /index.html;
+  }
+
+  # pass API requests to the python app
+  location = /api { rewrite ^ /api/; }
+  location /api { try_files $uri @api; }
+  location @api {
+    # You should run uwsgi like this: uwsgi -H `pwd` -s /tmp/uwsgi.sock --module src.main --callable app
+    # that command should be run from the root of the repository
+    # note that you might have to change the permissions of /tmp/uwsgi.sock to allow connections
+    include uwsgi_params;
+    uwsgi_param SCRIPT_NAME /api;
+    uwsgi_modifier1 30;
+    uwsgi_pass unix:/tmp/uwsgi.sock;
+  }
+
+}
+
