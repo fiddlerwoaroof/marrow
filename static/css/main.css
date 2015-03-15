@@ -95,7 +95,7 @@ a {
 @media (min-width: 443px) {
 
   #sidebar{
-    position: absolute;
+    position: fixed;
     height: 25%;
     width: 10%;
     top: 15%;
@@ -126,7 +126,7 @@ a {
   }
 
   #sidebar {
-    position: absolute;
+    position: fixed;
     height:70px;
     background:#fff;
     width: 100%;
@@ -148,7 +148,7 @@ a {
 
   #main {
     position: absolute;
-    overflow-y: scroll;
+    overflow-y: auto;
     width: 100%;
     top: 75px;
   }
@@ -159,3 +159,20 @@ a {
   }
 }
 
+a:hover {
+  text-decoration: underline;
+}
+
+#sidebar li.separator {
+  height: 10px;
+}
+
+a.link {
+  cursor: pointer;
+  -webkit-user-select: none; /* Chrome/Safari */        
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+ */
+  /* Rules below not implemented in browsers yet */
+  -o-user-select: none;
+  user-select: none;
+}

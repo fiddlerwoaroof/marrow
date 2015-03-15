@@ -11,13 +11,14 @@
 <body>
   <div class="container">
     <div ng-view></div>
-    <section id="sidebar">
+    <section id="sidebar" ng-controller="SidebarCtrl">
       <h1>Marrow</h1>
       <ul>
         <li><a href="/">Home</a></li>
         <li><a href="/subscriptions">My Lists</a></li>
-        <li><a href="/random">Random</a></li>
-        <li><a href="/api/user/logout?to=/">Log Out</a></li>
+        <li><a ng-click="random()" class="link">Random</a></li>
+        <li class="separator"></li>
+        <li><a ng-click="logout()" class="link">Log Out</a></li>
       </ul>
     </section>
   </div>
