@@ -27,6 +27,15 @@ def get_user_env():
         env['username'] = username
         return env
         
+@user_blueprint.route('/subscribe/<username>', methods=['POST'])
+def subscribe(username):
+    if 'username' in session:
+        db = database.get_db()
+        with db.cursor() as cur:
+            cur.callproc('subscribe', (session['username'], username))
+        db.commit()
+        return json.dumps(True)
+
 @user_blueprint.route('/list')
 def list_users():
     return json.dumps([_ for _ in users.keys()])

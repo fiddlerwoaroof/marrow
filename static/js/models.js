@@ -83,6 +83,16 @@ function Bone() {
         var theMarrow = $.map(data.marrow, function(item) { return new Marrow(item) });
         self.marrow(theMarrow);
       }
+      if (cb) cb();
+    });
+  };
+
+  self.mylists = function() {
+    $.getJSON("/api/bones/subscriptions", function(data) {
+      if (data !== []) {
+        var theMarrow = $.map(data.marrow, function(item) { return new Marrow(item) });
+        self.marrow(theMarrow);
+      }
       cb();
     });
   };
@@ -96,7 +106,8 @@ function Bone() {
         self.marrow.push(newLink);
         self.newLink("");
     }});
-  }
+  };
+
 };
 
 ko.applyBindings(new Bone());

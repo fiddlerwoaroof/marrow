@@ -22,7 +22,36 @@ def submit_link():
     return json.dumps(result)
 
 @bone_blueprint.route('',defaults={'username':None}, methods=['GET'])
-@bone_blueprint.route('/<username>', methods=['GET'])
+@bone_blueprint.route('/u/<username>', methods=['GET'])
+def data(username):
+    if username is None and 'username' in session:
+        username = session['username']
+
+    result = {'marrow':[]}
+    with database.get_db().cursor() as cur:
+        cur.execute("SELECT url, title, posted from get_bone(%s);", (username,))
+        result['marrow'] = [
+                dict(url=url,title=title,posted=posted.isoformat())
+                    for url,title,posted
+                    in cur.fetchall()
+        ]
+    return json.dumps(result)
+
+@bone_blueprint.route('/subscriptions')
+def subscriptions():
+    username = None
+    result = {'marrow':[]}
+    if 'username' in session:
+        username = session['username']
+        with database.get_db().cursor() as cur:
+            cur.execute("SELECT url, title, posted from get_bones(%s);", (username,))
+            result['marrow'] = [
+                    dict(url=url,title=title,posted=posted.isoformat())
+                        for url,title,posted
+                        in cur.fetchall()
+            ]
+    return json.dumps(result)
+
 def data(username):
     if username is None and 'username' in session:
         username = session['username']
