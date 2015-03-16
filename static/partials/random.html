@@ -1,5 +1,7 @@
 <section id="main">
-  <h2>{{sectionTitle}}</h2>
+  <h2>
+    <a class="user-link" ng-href="{{path('UserCtrl', {'user': sectionTitle})}}">{{path('UserCtrl', {'user': sectionTitle})}}</a>
+  </h2>
   <ul>
     <li ng-repeat="marrow in bone"><a href="{{marrow.url}}">{{marrow.url}}</a></li>
   </ul>

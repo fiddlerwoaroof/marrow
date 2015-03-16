@@ -1,12 +1,33 @@
 var marrowApp = angular.module('marrowApp', ['ngRoute']);
 
+// from http://stackoverflow.com/questions/15324039/how-to-create-a-url-for-link-helper-in-angularjjs
+marrowApp.run(function($route, $rootScope) {
+  $rootScope.path = function(controller, params) {
+    // Iterate over all available routes
+    var baseUrl = document.getElementsByTagName('base')[0].href.replace(/\/$/, '');
+    for(var path in $route.routes) {
+      var pathController = $route.routes[path].controller;
+      if(pathController == controller) { // Route found
+        var result = path;
+        // Construct the path with given parameters in it
+        for(var param in params) {
+          result = result.replace(':' + param, params[param]);
+        }
+        return baseUrl + result;
+      }
+    }
+    // No such controller in route definitions
+    return undefined;
+  };
+});
+
 
 marrowApp.config(['$routeProvider',
   function($routeProvider) {
     $routeProvider.
       when('/random', {templateUrl: 'partials/random.html', controller: 'RandomMarrowCtrl'}).
       when('/subscriptions', {templateUrl: 'partials/subscription.html', controller: 'SubscriptionCtrl'}).
-      when('/u/:user', {templateUrl: 'partials/random.html', controller: 'UserCtrl'}).
+      when('/user/:user', {templateUrl: 'partials/random.html', controller: 'UserCtrl'}).
       when('/login', {templateUrl: 'partials/login.html', controller: 'LoginCtrl'}).
       when('/', {templateUrl: 'partials/default.html', controller: 'MarrowCtrl'});
   }
@@ -57,6 +78,7 @@ function controllerFactory(name, getendpoint, cb, afterGet) {
   marrowApp.controller(name, function ($scope,$http,$location) {
     $scope.url = "";
     $scope.title = "";
+    $scope.sectionTitle = "";
 
     $http.get("/api/user/check").success(
       function(is_loggedon) {
@@ -84,7 +106,7 @@ function subscribe($http,$scope) {
   }
 }
 
-marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams) {
+marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams,$rootScope) {
   $scope.url = "";
   $scope.title = "";
 

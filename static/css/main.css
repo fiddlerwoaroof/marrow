@@ -69,15 +69,24 @@ a {
   left:25%;
 }
 
+#main h2 {
+  margin-bottom: 5px;
+  font-size: 23pt;
+}
+
 #sidebar h1 {
   text-align: center;
-  font-size: 24;
+  font-size: 26px;
   padding-bottom: 5px;
+}
+
+a.user-link {
+  color: inherit;
 }
 
 #main h2 {
   padding-bottom: 3px;
-  font-size: 14;
+  font-size: 18px;
   padding-left: 50px;
 }
 #main ul {
@@ -176,3 +185,4 @@ a.link {
   -o-user-select: none;
   user-select: none;
 }
+
