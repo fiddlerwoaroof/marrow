@@ -1,14 +1,35 @@
 import flask
 from flask import Blueprint, session, redirect, url_for, escape, request, abort, g
+from flask.ext.cors import cross_origin
 from . import database
 import json
 
 bone_blueprint = Blueprint('bone', __name__)
 
+@bone_blueprint.route('/link/<linkid>', methods=['GET','DELETE'])
+def delete_link(linkid):
+    db = database.get_db()
+    linkid = int(linkid)
+    result = ''
+    with db.cursor() as cur:
+        if request.method == 'GET':
+            cur.execute('SELECT id,url,title,posted FROM links WHERE id=%s', (linkid,))
+            nid,url,title,posted = cur.fetchone()
+            result = dict(id=nid,url=url,title=title,posted=posted.isoformat())
+        elif request.method == 'DELETE':
+            result = False
+            if 'username' in session:
+                cur.execute('SELECT delete_link(%s,%s)', (session['username'],linkid))
+                result = cur.fetchone()
+    db.commit()
+    return json.dumps(result)
+    
+
 @bone_blueprint.route('/add', methods=['POST'])
 @bone_blueprint.route('/submit', methods=['POST'])
+@cross_origin()
 def submit_link():
-    result = False
+    result = dict(success=False, id={});
     if 'username' in session:
         obj = request.get_json()
         url, title = obj['url'],obj['title']
@@ -16,10 +37,14 @@ def submit_link():
         db = database.get_db()
         with db.cursor() as cur:
             cur.callproc('put_link', (username, url, title))
-            cur.fetchall()
+            ## This returns (link_id, user_id)
+            res = cur.fetchone()
             if cur.rowcount != -1:
                 db.commit()
-                result = True
+                result['success'] = True
+                result['id'] = res[0]
+            else:
+                db.rollback()
     return json.dumps(result)
 
 @bone_blueprint.route('',defaults={'username':None}, methods=['GET'])
@@ -32,17 +57,33 @@ def data(username):
 
     result = {'marrow':[], 'sectionTitle': sectionTitle}
     with database.get_db().cursor() as cur:
-        cur.execute("SELECT url, title, posted from get_bone(%s);", (username,))
+        cur.execute("SELECT url, title, posted, linkid from get_bone(%s);", (username,))
         result['marrow'] = [
-                dict(url=url,title=title,posted=posted.isoformat())
-                    for url,title,posted
+                dict(id=linkid, url=url,title=title,posted=posted.isoformat())
+                    for url,title,posted,linkid
                     in cur.fetchall()
         ]
+    return json.dumps(result)
+
+# TODO: rethink variable names here
+@bone_blueprint.route('/unsubscribe', methods=['POST'])
+def unsubscribe():
+    data = request.get_json()
+    result = False
+    if 'username' in session:
+        fro_user = session['username']
+        to_user = data['from']
+        db = database.get_db()
+        with db.cursor() as cur:
+            cur.callproc('unsubscribe', (fro_user,to_user))
+            db.commit()
+            result = True
     return json.dumps(result)
 
 @bone_blueprint.route('/subscribe', methods=['POST'])
 def subscribe():
     data = request.get_json()
+    result = False
     if 'username' in session:
         fro_user = session['username']
         to_user = data['to']
@@ -50,7 +91,8 @@ def subscribe():
         with db.cursor() as cur:
             cur.callproc('subscribe', (fro_user,to_user))
             db.commit()
-            return json.dumps(True)
+            result = True
+    return json.dumps(result);
 
 @bone_blueprint.route('/subscriptions')
 def subscriptions():

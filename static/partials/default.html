@@ -1,12 +1,14 @@
 <section id="main">
-  <h2>{{sectionTitle}}</h2>
-  <ul>
-    <li ng-repeat="marrow in bone"><a href="{{marrow.url}}">{{marrow.url}}</a></li>
-  </ul>
-
+  <!--<h2>{{sectionTitle}}</h2>-->
   <form ng-submit="addLink()">
     <input type="text" ng-model="url" placeholder="http:// . . ."/>
     <button type="submit">+</button>
   </form>
+  <ul>
+    <li ng-repeat="marrow in bone">
+      <a href="{{marrow.url}}">{{marrow.url}}</a>
+      <a class="deletelink" ng-click="delete(marrow.id)">(-)</a>
+    </li>
+  </ul>
 </section>
 

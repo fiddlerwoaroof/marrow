@@ -1,6 +1,5 @@
 DROP TABLE IF EXISTS user_subscriptions;
-DROP TABLE IF EXISTS user_links;
-DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS user_links; DROP TABLE IF EXISTS users;
 CREATE TABLE users (
   id SERIAL UNIQUE NOT NULL,
   name TEXT UNIQUE NOT NULL,
@@ -36,6 +35,22 @@ CREATE TABLE user_links (
   PRIMARY KEY (id)
 );
 
+DROP FUNCTION IF EXISTS delete_link(text,int);
+CREATE OR REPLACE FUNCTION delete_link(username text, linkid int)
+  RETURNS bool AS $$
+DECLARE
+  uid int;
+  result bool;
+BEGIN
+  SELECT INTO uid id FROM users WHERE name=username;
+  SELECT INTO result exists(SELECT * FROM user_links WHERE user_id=uid AND link_id=linkid);
+  IF result THEN
+    DELETE FROM user_links WHERE user_id=uid AND link_id=linkid;
+  END IF;
+  RETURN result;
+END
+$$ LANGUAGE plpgsql;
+
 DROP FUNCTION IF EXISTS get_bones(text);
 CREATE OR REPLACE FUNCTION get_bones(username text)
   RETURNS TABLE(name text, url text, title text, posted timestamp) AS $$
@@ -60,14 +75,30 @@ $$ LANGUAGE plpgsql;
 
 DROP FUNCTION IF EXISTS get_bone(text);
 CREATE OR REPLACE FUNCTION get_bone(username text)
-  RETURNS TABLE(name text, url text, title text, posted timestamp) AS $$
+  RETURNS TABLE(name text, url text, title text, posted timestamp, linkid int) AS $$
 BEGIN
-  RETURN QUERY SELECT users.name, links.url, links.title, links.posted
+  RETURN QUERY SELECT users.name, links.url, links.title, links.posted, links.id
       FROM users
         INNER JOIN user_links ON user_links.user_id = users.id
         INNER JOIN links ON user_links.link_id = links.id
         WHERE users.name=username
         ORDER BY links.posted DESC;
+END
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS unsubscribe(text,text);
+CREATE OR REPLACE FUNCTION unsubscribe(user1 text, user2 text) RETURNS int
+AS $$
+DECLARE
+  user1_id int;
+  user2_id int;
+  result int;
+BEGIN
+  SELECT INTO user1_id id FROM users WHERE users.name = user1;
+  SELECT INTO user2_id id FROM users WHERE users.name = user2;
+
+  DELETE FROM user_subscriptions WHERE fro_id = user1_id AND to_id = user2_id;
+  RETURN result;
 END
 $$ LANGUAGE plpgsql;
 

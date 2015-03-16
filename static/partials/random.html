@@ -5,9 +5,8 @@
   <ul>
     <li ng-repeat="marrow in bone"><a href="{{marrow.url}}">{{marrow.url}}</a></li>
   </ul>
-  <form ng-submit="subscribe()" id="subscribe" class="hidden">
-    <button type="submit">Subscribe</button>
-  </form>
+  <form ng-submit="subscribe()" id="subscribe" class="hidden"><button type="submit">Subscribe</button></form>
+  <form ng-submit="unsubscribe()" id="unsubscribe" class="hidden"><button type="submit">unSubscribe</button></form>
 </section>
 
 

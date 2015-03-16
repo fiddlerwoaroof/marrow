@@ -44,18 +44,18 @@ marrowApp.controller('LoginCtrl', function ($scope,$http,$route,$location) {
   .success(
     function(is_loggedon) {
       is_loggedon = JSON.parse(is_loggedon);
-      if (is_loggedon) { $location.url('/') };
+      if (is_loggedon) { $location.url('/');}
   });
 
   $scope.newuser = function () {
     var username = $scope.username;
     var password = $scope.password;
-    var postObj = {"username":username, "password": password}
+    var postObj = {"username":username, "password": password};
     console.log(postObj);
     $http.post("/api/user/add", postObj)
     .success(function(added_user) {
       added_user = JSON.parse(added_user);
-      if(added_user === true) {$location.url('/');};
+      if(added_user === true) {$location.url('/');}
     });
   };
 
@@ -68,42 +68,64 @@ marrowApp.controller('LoginCtrl', function ($scope,$http,$route,$location) {
       function (login_succeeded) {
         login_succeeded = JSON.parse(login_succeeded);
         var el = angular.element(document.querySelector('#login_form'));
-        if (login_succeeded === true) {el.removeClass('hidden')};
+        if (login_succeeded === true) {el.removeClass('hidden');}
         $location.url('/');
     });
   };
 });
 
 function controllerFactory(name, getendpoint, cb, afterGet) {
-  marrowApp.controller(name, function ($scope,$http,$location) {
+  marrowApp.controller(name, function ($scope,$http,$location,$route) {
     $scope.url = "";
     $scope.title = "";
     $scope.sectionTitle = "";
 
+    $scope.update = function() {
+      return $http.get(getendpoint).success(function(data) {
+        $scope.sectionTitle = data.sectionTitle;
+        $scope.bone = data.marrow;
+      });
+    };
+
     $http.get("/api/user/check").success(
       function(is_loggedon) {
         is_loggedon = JSON.parse(is_loggedon);
-        if (!is_loggedon) { $location.url('/login') };
+        if (!is_loggedon) { $location.url('/login');}
     }).finally(function (){
 
-      $http.get(getendpoint).success(function(data) {
+      $scope.update().success(function(data) {
         $scope.sectionTitle = data.sectionTitle;
         $scope.bone = data.marrow;
-        if (afterGet !== undefined) {afterGet($scope,$http);};
+        if (afterGet !== undefined) {afterGet($scope,$http,$route);}
       });
 
-      if (cb !== undefined) {cb($scope,$http);};
+      if (cb !== undefined) {cb($scope,$http,$route);}
     });
   });
-};
+}
+
+function unsubscribe($http,$scope) {
+  return function () {
+    var postObj = {"from":$scope.sectionTitle};
+    $http.post('/api/bones/unsubscribe', postObj);
+
+    var subscribeform = angular.element(document.querySelector('#subscribe'));
+    subscribeform.removeClass('hidden');
+    var unsubscribeform = angular.element(document.querySelector('#unsubscribe'));
+    unsubscribeform.addClass('hidden');
+  };
+}
 
 function subscribe($http,$scope) {
   return function () {
     var postObj = {"to":$scope.sectionTitle};
     $http.post('/api/bones/subscribe', postObj);
-    var el = angular.element(document.querySelector('#subscribe'));
-    el.addClass('hidden');
-  }
+
+    var subscribeform = angular.element(document.querySelector('#subscribe'));
+    subscribeform.addClass('hidden');
+    var unsubscribeform = angular.element(document.querySelector('#unsubscribe'));
+    unsubscribeform.removeClass('hidden');
+  };
 }
 
 marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams,$rootScope) {
@@ -114,10 +136,16 @@ marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams,$rootScope)
 
   $http.get('/api/user/follows/'+user).success(function(result) {
       result = JSON.parse(result);
-      var el = angular.element(document.querySelector('#subscribe'));
-      if (result === false) {el.removeClass('hidden')};
+
+      var unsubscribeform = angular.element(document.querySelector('#unsubscribe'));
+      console.log(unsubscribeform);
+      if (result === true) {unsubscribeform.removeClass('hidden');}
+
+      var subscribeform = angular.element(document.querySelector('#subscribe'));
+      if (result === false) {subscribeform.removeClass('hidden');}
   });
 
+  $scope.unsubscribe = unsubscribe($http, $scope);
   $scope.subscribe = subscribe($http, $scope);
   $http.get('/api/bones/u/'+user).success(function(data) {
     $scope.sectionTitle = data.sectionTitle;
@@ -128,12 +156,18 @@ marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams,$rootScope)
 controllerFactory('RandomMarrowCtrl', '/api/bones/random',
   function($scope,$http) {
     $scope.subscribe = subscribe($http, $scope);
+    $scope.unsubscribe = unsubscribe($http, $scope);
   },
   function ($scope,$http) {
     $http.get('/api/user/follows/'+$scope.sectionTitle).success(function(result) {
       result = JSON.parse(result);
-      var el = angular.element(document.querySelector('#subscribe'));
-      if (result === false) {el.removeClass('hidden')};
+
+      var unsubscribeform = angular.element(document.querySelector('#unsubscribe'));
+      if (result === true) {unsubscribeform.removeClass('hidden');}
+
+      var subscribeform = angular.element(document.querySelector('#subscribe'));
+      console.log(subscribeform);
+      if (result === false) {subscribeform.removeClass('hidden');}
   });
 });
 
@@ -141,8 +175,8 @@ controllerFactory('SubscriptionCtrl', '/api/bones/subscriptions');
 
 marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route) {
   $scope.random = function() {
-    if ($location.url() !== '/random') { $location.url('/random') }
-    else { $route.reload() };
+    if ($location.url() !== '/random') { $location.url('/random'); }
+    else { $route.reload(); }
   };
 
   $scope.logout = function() {
@@ -150,11 +184,23 @@ marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route) {
   };
 });
 
-controllerFactory('MarrowCtrl', '/api/bones', function($scope,$http) {
+controllerFactory('MarrowCtrl', '/api/bones', function($scope,$http,$route) {
+  $scope.delete = function(linkid) {
+    console.log(linkid);
+    $http.delete('/api/bones/link/'+linkid).success(
+      function (deleted) {
+        if (deleted !== true) {
+          $scope.update();
+        }
+      }
+    );
+  };
+
   $scope.addLink = function() {
     var postObj = {"url":$scope.url, "title":$scope.title};
-    $http.post('/api/bones/add', postObj).success(function(success) {
-      if (success) {
+    $http.post('/api/bones/add', postObj).success(function(data) {
+      if (data.success) {
+        postObj.id = data.id;
         $scope.bone.unshift(postObj);
         $scope.url = "";
       }
