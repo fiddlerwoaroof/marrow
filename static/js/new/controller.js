@@ -6,9 +6,8 @@ marrowApp.config(['$routeProvider',
     $routeProvider.
       when('/random', {templateUrl: 'partials/random.html', controller: 'RandomMarrowCtrl'}).
       when('/subscriptions', {templateUrl: 'partials/subscription.html', controller: 'SubscriptionCtrl'}).
-      when('/u/:user', {templateUrl: 'partials/user.html', controller: 'UserCtrl'}).
+      when('/u/:user', {templateUrl: 'partials/random.html', controller: 'UserCtrl'}).
       when('/login', {templateUrl: 'partials/login.html', controller: 'LoginCtrl'}).
-      when('/logout', {templateUrl: 'partials/login.html', controller: 'Logout'}).
       when('/', {templateUrl: 'partials/default.html', controller: 'MarrowCtrl'});
   }
 ]);
@@ -18,9 +17,6 @@ marrowApp.config(['$locationProvider',
     $locationProvider.html5Mode(true);
   }
 ]);
-
-marrowApp.controller('Logout', function ($scope,$http,$route,$location) {
-});
 
 marrowApp.controller('LoginCtrl', function ($scope,$http,$route,$location) {
   $http.get("/api/user/check")
@@ -79,14 +75,37 @@ function controllerFactory(name, getendpoint, cb, afterGet) {
   });
 };
 
+function subscribe($http,$scope) {
+  return function () {
+    var postObj = {"to":$scope.sectionTitle};
+    $http.post('/api/bones/subscribe', postObj);
+    var el = angular.element(document.querySelector('#subscribe'));
+    el.addClass('hidden');
+  }
+}
+
+marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams) {
+  $scope.url = "";
+  $scope.title = "";
+
+  var user = $routeParams.user;
+
+  $http.get('/api/user/follows/'+user).success(function(result) {
+      result = JSON.parse(result);
+      var el = angular.element(document.querySelector('#subscribe'));
+      if (result === false) {el.removeClass('hidden')};
+  });
+
+  $scope.subscribe = subscribe($http, $scope);
+  $http.get('/api/bones/u/'+user).success(function(data) {
+    $scope.sectionTitle = data.sectionTitle;
+    $scope.bone = data.marrow;
+  });
+});
+
 controllerFactory('RandomMarrowCtrl', '/api/bones/random',
   function($scope,$http) {
-    $scope.subscribe = function() {
-      var postObj = {"to":$scope.sectionTitle};
-      $http.post('/api/bones/subscribe', postObj);
-      var el = angular.element(document.querySelector('#subscribe'));
-      el.addClass('hidden');
-    };
+    $scope.subscribe = subscribe($http, $scope);
   },
   function ($scope,$http) {
     $http.get('/api/user/follows/'+$scope.sectionTitle).success(function(result) {
@@ -107,16 +126,6 @@ marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route) {
   $scope.logout = function() {
     $http.get('/api/user/logout').finally(function() { $location.url('/login'); });
   };
-});
-
-marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams) {
-  $scope.url = "";
-  $scope.title = "";
-
-  $http.get('/api/bones/u/'+$routeParams.user).success(function(data) {
-    $scope.sectionTitle = data.sectionTitle;
-    $scope.bone = data.marrow;
-  });
 });
 
 controllerFactory('MarrowCtrl', '/api/bones', function($scope,$http) {
