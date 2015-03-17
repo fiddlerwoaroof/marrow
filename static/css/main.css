@@ -180,7 +180,7 @@ a:hover {
   height: 10px;
 }
 
-a.link a.deletelink {
+a.link, a.deletelink {
   cursor: pointer;
   -webkit-user-select: none; /* Chrome/Safari */        
   -moz-user-select: none; /* Firefox */
