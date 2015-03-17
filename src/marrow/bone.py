@@ -40,7 +40,7 @@ def submit_link():
     db = database.get_db()
     obj = request.get_json()
     if 'username' in obj:
-        _username = request.args['username']
+        _username = obj['username']
         if 'ak' in obj and database.check_ak(db, _username, obj['ak']): 
             username = _username
         else:
