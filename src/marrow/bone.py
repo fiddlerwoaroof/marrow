@@ -20,7 +20,7 @@ def delete_link(linkid):
             result = False
             if 'username' in session:
                 cur.execute('SELECT delete_link(%s,%s)', (session['username'],linkid))
-                result = cur.fetchone()
+                result = cur.fetchone()[0]
     db.commit()
     return json.dumps(result)
     
@@ -50,10 +50,9 @@ def submit_link():
 @bone_blueprint.route('',defaults={'username':None}, methods=['GET'])
 @bone_blueprint.route('/u/<username>', methods=['GET'])
 def data(username):
-    sectionTitle = username
     if username is None and 'username' in session:
         username = session['username']
-        sectionTitle = 'My Links'
+    sectionTitle = username
 
     result = {'marrow':[], 'sectionTitle': sectionTitle}
     with database.get_db().cursor() as cur:

@@ -1,5 +1,17 @@
 var marrowApp = angular.module('marrowApp', ['ngRoute']);
 
+function deleteLink($scope) {
+  return function (linkid) {
+    injector = angular.injector(['ng']);
+    $http = injector.get('$http');
+    $http.delete('/api/bones/link/'+linkid).success(function (deleted) {
+      deleted = JSON.parse(deleted);
+      if (deleted === true) { $scope.update(); }
+    });
+  };
+}
+
+
 // from http://stackoverflow.com/questions/15324039/how-to-create-a-url-for-link-helper-in-angularjjs
 marrowApp.run(function($route, $rootScope) {
   $rootScope.path = function(controller, params) {
@@ -27,7 +39,8 @@ marrowApp.config(['$routeProvider',
     $routeProvider.
       when('/random', {templateUrl: 'partials/random.html', controller: 'RandomMarrowCtrl'}).
       when('/subscriptions', {templateUrl: 'partials/subscription.html', controller: 'SubscriptionCtrl'}).
-      when('/user/:user', {templateUrl: 'partials/random.html', controller: 'UserCtrl'}).
+      when('/user/:user', {template: '<div ng-include="templateUrl">Loading...</div>', controller: 'UserCtrl'}).
+      
       when('/login', {templateUrl: 'partials/login.html', controller: 'LoginCtrl'}).
       when('/', {templateUrl: 'partials/default.html', controller: 'MarrowCtrl'});
   }
@@ -131,26 +144,40 @@ function subscribe($http,$scope) {
 marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams,$rootScope) {
   $scope.url = "";
   $scope.title = "";
+  $scope.unsubscribe = unsubscribe($http, $scope);
+  $scope.subscribe = subscribe($http, $scope);
 
+  var getendpoint = '/api/bones/u/'+$routeParams.user;
+  $scope.update = function() {
+    console.log('updating');
+    return $http.get(getendpoint).success(function(data) {
+      $scope.sectionTitle = data.sectionTitle;
+      $scope.bone = data.marrow;
+    });
+  };
+
+  $scope.delete = deleteLink($scope);
   var user = $routeParams.user;
 
   $http.get('/api/user/follows/'+user).success(function(result) {
-      result = JSON.parse(result);
+      if (result.me === user) {
+        $scope.templateUrl = "/partials/default.html";
+      } else {
+        $scope.templateUrl = "/partials/random.html";
+        var unsubscribeform = angular.element(document.querySelector('#unsubscribe'));
+        console.log(unsubscribeform);
+        if (result.follows === true) {unsubscribeform.removeClass('hidden');}
 
-      var unsubscribeform = angular.element(document.querySelector('#unsubscribe'));
-      console.log(unsubscribeform);
-      if (result === true) {unsubscribeform.removeClass('hidden');}
-
-      var subscribeform = angular.element(document.querySelector('#subscribe'));
-      if (result === false) {subscribeform.removeClass('hidden');}
+        var subscribeform = angular.element(document.querySelector('#subscribe'));
+        if (result.follows === false) {subscribeform.removeClass('hidden');}
+      }
+  }).success(function (){
+    $http.get(getendpoint).success(function(data) {
+      $scope.sectionTitle = data.sectionTitle;
+      $scope.bone = data.marrow;
+    });
   });
 
-  $scope.unsubscribe = unsubscribe($http, $scope);
-  $scope.subscribe = subscribe($http, $scope);
-  $http.get('/api/bones/u/'+user).success(function(data) {
-    $scope.sectionTitle = data.sectionTitle;
-    $scope.bone = data.marrow;
-  });
 });
 
 controllerFactory('RandomMarrowCtrl', '/api/bones/random',
@@ -160,14 +187,12 @@ controllerFactory('RandomMarrowCtrl', '/api/bones/random',
   },
   function ($scope,$http) {
     $http.get('/api/user/follows/'+$scope.sectionTitle).success(function(result) {
-      result = JSON.parse(result);
-
       var unsubscribeform = angular.element(document.querySelector('#unsubscribe'));
-      if (result === true) {unsubscribeform.removeClass('hidden');}
+      if (result.follows === true) {unsubscribeform.removeClass('hidden');}
 
       var subscribeform = angular.element(document.querySelector('#subscribe'));
       console.log(subscribeform);
-      if (result === false) {subscribeform.removeClass('hidden');}
+      if (result.follows === false) {subscribeform.removeClass('hidden');}
   });
 });
 
@@ -185,16 +210,7 @@ marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route) {
 });
 
 controllerFactory('MarrowCtrl', '/api/bones', function($scope,$http,$route) {
-  $scope.delete = function(linkid) {
-    console.log(linkid);
-    $http.delete('/api/bones/link/'+linkid).success(
-      function (deleted) {
-        if (deleted !== true) {
-          $scope.update();
-        }
-      }
-    );
-  };
+  $scope.delete = deleteLink($scope);
 
   $scope.addLink = function() {
     var postObj = {"url":$scope.url, "title":$scope.title};

@@ -29,13 +29,15 @@ def get_user_env():
 
 @user_blueprint.route('/follows/<to>')
 def follows(to):
-    result = False
+    result = {'follows': False, 'me': ''}
     if 'username' in session:
         fro = session['username']
         db = database.get_db()
         with db.cursor() as cur:
             cur.callproc('follows', (fro,to))
-            result = cur.fetchone()[0]
+            result['follows'] = cur.fetchone()[0]
+            result['me'] = session['username']
+        db.commit()
     return json.dumps(result)
         
 @user_blueprint.route('/subscribe/<username>', methods=['POST'])

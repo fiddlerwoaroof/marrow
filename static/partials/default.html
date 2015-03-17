@@ -1,5 +1,7 @@
 <section id="main">
-  <!--<h2>{{sectionTitle}}</h2>-->
+  <h2>
+    <a class="user-link" ng-href="{{path('UserCtrl', {'user': sectionTitle})}}">{{path('UserCtrl', {'user': sectionTitle})}}</a>
+  </h2>
   <form ng-submit="addLink()">
     <input type="text" ng-model="url" placeholder="http:// . . ."/>
     <button type="submit">+</button>
