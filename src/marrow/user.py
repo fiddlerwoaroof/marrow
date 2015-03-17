@@ -61,6 +61,8 @@ def adduser():
     with db.cursor() as cur:
         obj = request.get_json();
         username, password = obj['username'], obj['password']
+        username = username.strip().lower()
+        password = password.strip()
         cur.execute('INSERT INTO users (name,password,email) VALUES (%s,%s,%s)',
                     (username, password, 'abc@def.com'))
         _get_users()
@@ -82,6 +84,8 @@ def login():
     obj = request.get_json();
     result = False
     username, password = obj['username'], obj['password']
+    username = username.strip().lower()
+    password = password.strip()
     user = users.get(username, {})
     rightPassword = user.get('password',None)
     if password == rightPassword:

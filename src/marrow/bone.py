@@ -1,6 +1,8 @@
 import flask
 from flask import Blueprint, session, redirect, url_for, escape, request, abort, g
 from flask.ext.cors import cross_origin
+import urllib2
+import lxml.html
 from . import database
 import urlparse
 import json
@@ -31,6 +33,11 @@ def clean_url(url):
         netloc, path = path, netloc
     return urlparse.urlunparse((scheme, netloc, path, params, query, fragment))
 
+def get_title(url):
+    data = urllib2.urlopen(url)
+    etree = lxml.html.parse(data)
+    return etree.xpath('//title')[0].text
+
 @bone_blueprint.route('/add', methods=['POST'])
 @bone_blueprint.route('/submit', methods=['POST'])
 @cross_origin(allow_headers='Content-Type')
@@ -52,11 +59,12 @@ def submit_link():
     if username is not None:
         url, title = obj['url'],obj['title']
         url = clean_url(url)
+        title = get_title(url)
         with db.cursor() as cur:
             cur.callproc('put_link', (username, url, title))
             ## This returns (link_id, user_id)
             res = cur.fetchone()
-            if cur.rowcount != -1:
+            if cur.rowcount > 0:
                 db.commit()
                 result['success'] = True
                 result['id'] = res[0]
