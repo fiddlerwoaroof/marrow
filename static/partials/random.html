@@ -1,12 +1,12 @@
 <section id="main">
-  <h2>
+  <h2 class="section-title">
     <a class="user-link" ng-href="{{path('UserCtrl', {'user': sectionTitle})}}">{{path('UserCtrl', {'user': sectionTitle})}}</a>
   </h2>
-  <ul>
+  <ul class="bone-list">
     <li ng-repeat="marrow in bone"><a href="{{marrow.url}}">{{marrow.url}}</a></li>
   </ul>
-  <form ng-submit="subscribe()" id="subscribe" class="hidden"><button type="submit">Subscribe</button></form>
-  <form ng-submit="unsubscribe()" id="unsubscribe" class="hidden"><button type="submit">unSubscribe</button></form>
+  <form ng-submit="subscribe()" id="subscribe" class="is-hidden sub-add"><button type="submit">Subscribe</button></form>
+  <form ng-submit="unsubscribe()" id="unsubscribe" class="is-hidden sub-remove"><button type="submit">unSubscribe</button></form>
 </section>
 
 

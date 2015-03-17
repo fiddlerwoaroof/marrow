@@ -1,60 +1,65 @@
+/* @override 
+http://marrow.elangley.org/css/main.css */
+
 @import url(//fonts.googleapis.com/css?family=Lato:400,700,400italic);
 @import url(//fonts.googleapis.com/css?family=Oxygen:400,700,400italic);
 @import url(//fonts.googleapis.com/css?family=Quicksand:400,700);
 @import url(//fonts.googleapis.com/css?family=Josefin+Sans:400,700,400italic);
 
+/* @group Browser Resets */
+
 html {
-    -ms-text-size-adjust: 100%;
-    -webkit-text-size-adjust: 100%;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box !important;
 }
 
 body {
-    margin: 0;
-    font-size: 16px;
+  margin: 0;
+  font-size: 16px;
 }
 
 h1, h2, h3, h4, p, blockquote, figure, ol, ul {
-    margin: 0;
-    padding: 0;
+  margin: 0;
+  padding: 0;
 }
 
 li {
-    display: block;
+  display: block;
 }
 
 h1, h2, h3, h4 {
-    font-size: inherit;
+  font-size: inherit;
 }
-
-a {
-    text-decoration: none;
-    color: blue;
-    -webkit-transition: .3s;
-    -moz-transition: .3s;
-    transition: .3s;
-}
-
-img {
-    max-width: 100%;
-    height: auto;
-    border: 0;
-}
-
-
-body {
-  font-family: 'Josefin Sans', sans-serif;
-  box-sizing: border-box;
-}
-
 
 
 a {
   text-decoration: none;
+  color: blue;
+  transition-property: color;
+  transition-duration: .2s;
+  transition: .2s;
 }
 
-.hidden {
+img {
+  max-width: 100%;
+  height: auto;
+  border: 0;
+}
+
+/* @end */
+
+
+body {
+  font-family: 'Josefin Sans', sans-serif;
+}
+
+.is-hidden {
   display: none;
 }
 
@@ -62,26 +67,30 @@ a {
   z-index: 100;
   background: white;
   position: absolute;
-  height:100%;
-  width:100%;
+  height: 100%;
+  width: 100%;
   top: 0px;
   left: 0px;
 }
 #login_form form {
   position: absolute;
-  top:25%;
-  left:25%;
+  top: 25%;
+  left: 25%;
 }
 
-#main h2 {
-  margin-bottom: 5px;
-  font-size: 23pt;
+header {
+  padding: 20px;
+  background: #300;
+  background: #000;
 }
 
-#sidebar h1 {
+header .site-logo {
   text-align: center;
-  font-size: 26px;
-  padding-bottom: 5px;
+  color: white;
+  font-size: 1.5em;
+  text-transform: uppercase;
+  letter-spacing: .2em;
+  margin: .2em 0 -.1em;
 }
 
 a.user-link {
@@ -89,100 +98,104 @@ a.user-link {
 }
 
 #main h2 {
-  padding-bottom: 3px;
-  font-size: 18px;
-  padding-left: 50px;
+  margin-bottom: 10px;
+  font-size: 24px;
+  padding-left: 0;
 }
 #main ul {
-  position:relative;
+  position: relative;
 }
 
 #main form {
   padding-top: 5px;
   width: 350px;
 }
-#main form input[type="text"]{
+#main form input[type="text"] {
   width: 315px;
 }
 
 @media (min-width: 443px) {
 
-  #sidebar{
-    position: fixed;
-    height: 25%;
-    width: 10%;
-    top: 15%;
+  #nav-main {
+    position: absolute;
+    width: 20%;
+    padding-right: 7%;
+    top: 0px;
     left: 0px;
+    margin-top: 150px;
   }
 
-  #main{
-    padding-left: 10px;
-    padding-top: 50px;
+  #main {
+    margin-top: 100px;
     position: absolute;
-    height:100%;
-    top:0px;
-    right:0px;
+    height: 100%;
+    top: 0px;
+    right: 0px;
     width: 80%;
   }
 
-  #sidebar ul {
+  #nav-main ul {
     text-align: right;
     padding-right: 5px;
   }
 
-
 }
 
 @media (max-width: 443px) {
+
   body {
     padding-left: 5px;
   }
 
-  #sidebar {
+  #nav-main {
     position: fixed;
-    height:70px;
-    background:#fff;
+    height: 70px;
+    background: #fff;
     width: 100%;
     top: 0px;
+    margin: 0 auto;
+    padding: 10px;
   }
 
-  #sidebar ul {
+  #nav-main ul {
     position: relative;
     display: block;
     clear: both;
     width: 100%;
+    text-align: center;
   }
 
-  #sidebar ul li {
-    display: inline;
-    background: #aaa;
-    padding: 5px;
+  #nav-main ul li {
+    display: inline-block;
+    background: #ddd;
+    padding: 5px 10px;
   }
 
   #main {
     position: absolute;
     overflow-y: auto;
     width: 100%;
-    top: 75px;
+    margin-top: 75px;
   }
 
-  # main ul li {
-    min-height: 50px;
-    background: black;
+  /*  # main ul li {
+  min-height: 50px;
+  background: black;
   }
+  */
 }
 
 a:hover {
   text-decoration: underline;
 }
 
-#sidebar li.separator {
-  height: 10px;
+#nav-main logout-link {
+  margin-top: 10px;
 }
 
-a.link, a.deletelink {
+a.link, a.delete-link {
   cursor: pointer;
-  -webkit-user-select: none; /* Chrome/Safari */        
+  -webkit-user-select: none; /* Chrome/Safari */    
   -moz-user-select: none; /* Firefox */
   -ms-user-select: none; /* IE10+ */
   /* Rules below not implemented in browsers yet */
@@ -190,11 +203,11 @@ a.link, a.deletelink {
   user-select: none;
 }
 
-a.deletelink {
+a.delete-link {
   color: red;
   cursor: pointer;
 }
-a.deletelink:hover {
+a.delete-link:hover {
   text-decoration: none;
   color: brown;
 }

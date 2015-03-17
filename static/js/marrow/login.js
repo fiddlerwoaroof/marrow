@@ -7,7 +7,7 @@ function Login(master) {
     $.getJSON("/api/user/check", function (logged_in) {
       if (logged_in) {
         master.update(function() {
-          $('#login_form').addClass('hidden');
+          $('#login_form').addClass('is-hidden');
         });
       }
     });
@@ -25,7 +25,7 @@ function Login(master) {
         var login_form = $('#login_form');
         if (login_succeeded === true) {
           master.update(function() {
-            login_form.addClass('hidden');
+            login_form.addClass('is-hidden');
           });
         } else {
           login_form.children('.message').text('Login Failed!').addClass('err');
@@ -45,7 +45,7 @@ function Login(master) {
         creation_succeeded = JSON.parse(creation_succeeded);
         console.log(creation_succeeded);
         if (creation_succeeded === true) {
-          $('#login_form').addClass('hidden');
+          $('#login_form').addClass('is-hidden');
         }
       }
     });

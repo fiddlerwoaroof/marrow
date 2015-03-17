@@ -1,14 +1,14 @@
 <section id="main">
-  <h2>
+  <h2 class="section-title">
     <a class="user-link" ng-href="{{path('UserCtrl', {'user': sectionTitle})}}">{{path('UserCtrl', {'user': sectionTitle})}}</a>
   </h2>
   <form>
     <input type="text" ng-model="url" placeholder="http:// . . ."/>
     <button type="submit" ng-click="addLink(url)">+</button>
   </form>
-  <ul>
+  <ul class="bone-list">
     <li ng-repeat="marrow in bone">
-      <a class="deletelink" ng-click="delete(marrow.id)">(-)</a>
+      <a href class="delete-link" ng-click="delete(marrow.id)" title="Delete Link from List">(-)</a>
       <a href="{{marrow.url}}">{{marrow.url}}</a>
     </li>
   </ul>

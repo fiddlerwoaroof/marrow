@@ -81,7 +81,7 @@ marrowApp.controller('LoginCtrl', function ($scope,$http,$route,$location) {
       function (login_succeeded) {
         login_succeeded = JSON.parse(login_succeeded);
         var el = angular.element(document.querySelector('#login_form'));
-        if (login_succeeded === true) {el.removeClass('hidden');}
+        if (login_succeeded === true) {el.removeClass('is-hidden');}
         $location.url('/');
     });
   };
@@ -123,9 +123,9 @@ function unsubscribe($http,$scope) {
     $http.post('/api/bones/unsubscribe', postObj);
 
     var subscribeform = angular.element(document.querySelector('#subscribe'));
-    subscribeform.removeClass('hidden');
+    subscribeform.removeClass('is-hidden');
     var unsubscribeform = angular.element(document.querySelector('#unsubscribe'));
-    unsubscribeform.addClass('hidden');
+    unsubscribeform.addClass('is-hidden');
   };
 }
 
@@ -135,9 +135,9 @@ function subscribe($http,$scope) {
     $http.post('/api/bones/subscribe', postObj);
 
     var subscribeform = angular.element(document.querySelector('#subscribe'));
-    subscribeform.addClass('hidden');
+    subscribeform.addClass('is-hidden');
     var unsubscribeform = angular.element(document.querySelector('#unsubscribe'));
-    unsubscribeform.removeClass('hidden');
+    unsubscribeform.removeClass('is-hidden');
   };
 }
 
@@ -181,10 +181,10 @@ marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams) {
         $scope.templateUrl = "/partials/random.html";
         var unsubscribeform = angular.element(document.querySelector('#unsubscribe'));
         console.log(unsubscribeform);
-        if (result.follows === true) {unsubscribeform.removeClass('hidden');}
+        if (result.follows === true) {unsubscribeform.removeClass('is-hidden');}
 
         var subscribeform = angular.element(document.querySelector('#subscribe'));
-        if (result.follows === false) {subscribeform.removeClass('hidden');}
+        if (result.follows === false) {subscribeform.removeClass('is-hidden');}
       }
   }).success(function (){
     $http.get(getendpoint).success(function(data) {
@@ -203,11 +203,11 @@ controllerFactory('RandomMarrowCtrl', '/api/bones/random',
   function ($scope,$http) {
     $http.get('/api/user/follows/'+$scope.sectionTitle).success(function(result) {
       var unsubscribeform = angular.element(document.querySelector('#unsubscribe'));
-      if (result.follows === true) {unsubscribeform.removeClass('hidden');}
+      if (result.follows === true) {unsubscribeform.removeClass('is-hidden');}
 
       var subscribeform = angular.element(document.querySelector('#subscribe'));
       console.log(subscribeform);
-      if (result.follows === false) {subscribeform.removeClass('hidden');}
+      if (result.follows === false) {subscribeform.removeClass('is-hidden');}
   });
 });
 

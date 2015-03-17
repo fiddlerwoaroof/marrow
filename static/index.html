@@ -13,15 +13,14 @@
   <div id="page-container">
     <main ng-view></main>
     <header>
-      <h1 id="site-logo">Marrow</h1>
+      <h1 class="site-logo">Marrow</h1>
     </header>
     <nav id="nav-main" ng-controller="SidebarCtrl">
       <ul>
         <li><a href="/">Home</a></li>
         <li><a href="/subscriptions">My Lists</a></li>
-        <li><a href ng-click="random()" class="link">Random</a></li>
-        <li class="separator"></li>
-        <li><a href ng-click="logout()" class="link">Log Out</a></li>
+        <li><a href ng-click="random()">Random</a></li>
+        <li class="logout-link"><a href ng-click="logout()">Log Out</a></li>
       </ul>
     </nav>
     <footer></footer>
