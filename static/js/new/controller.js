@@ -1,9 +1,9 @@
 var marrowApp = angular.module('marrowApp', ['ngRoute']);
 
 function deleteLink($scope) {
+  injector = angular.injector(['ng']);
+  $http = injector.get('$http');
   return function (linkid) {
-    injector = angular.injector(['ng']);
-    $http = injector.get('$http');
     $http.delete('/api/bones/link/'+linkid).success(function (deleted) {
       deleted = JSON.parse(deleted);
       if (deleted === true) { $scope.update(); }
@@ -141,11 +141,27 @@ function subscribe($http,$scope) {
   };
 }
 
-marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams,$rootScope) {
+marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams) {
   $scope.url = "";
   $scope.title = "";
   $scope.unsubscribe = unsubscribe($http, $scope);
   $scope.subscribe = subscribe($http, $scope);
+  $scope.delete = deleteLink($scope);
+
+  $scope.addLink = function(url) {
+    console.log(url);
+    var postObj = {"url":url, "title":$scope.title};
+    $http.post('/api/bones/add', postObj).success(function(data) {
+      if (data.success) {
+        //postObj.id = data.id;
+        $scope.update();
+        $scope.url = "";
+      }
+    });
+  };
+
+  q = $scope;
+
 
   var getendpoint = '/api/bones/u/'+$routeParams.user;
   $scope.update = function() {
@@ -156,7 +172,6 @@ marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams,$rootScope)
     });
   };
 
-  $scope.delete = deleteLink($scope);
   var user = $routeParams.user;
 
   $http.get('/api/user/follows/'+user).success(function(result) {
@@ -212,14 +227,16 @@ marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route) {
 controllerFactory('MarrowCtrl', '/api/bones', function($scope,$http,$route) {
   $scope.delete = deleteLink($scope);
 
-  $scope.addLink = function() {
-    var postObj = {"url":$scope.url, "title":$scope.title};
-    $http.post('/api/bones/add', postObj).success(function(data) {
-      if (data.success) {
-        postObj.id = data.id;
-        $scope.bone.unshift(postObj);
-        $scope.url = "";
-      }
-    });
-  };
+  function addLink($scope) {
+    injector = angular.injector(['ng']);
+    $http = injector.get('$http');
+    return function(url) {
+      var postObj = {"url":url, "title":$scope.title};
+      $http.post('/api/bones/add', postObj).success(function(data) {
+        if (data.success) { $scope.update(); }
+      });
+    };
+  }
+
+  $scope.addLink = addLink($scope);
 });
