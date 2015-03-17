@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, g
 import os
 import base64
 
@@ -11,11 +11,14 @@ app.teardown_appcontext(database.close_connection)
 app.config["APPLICATION_ROOT"] = "/api"
 
 try:
-    from marrow_config import secret_key
+    from marrow_config import config
 except ImportError:
-    secret_key = base64.b64encode(os.urandom(24))
+    class config:
+        secret_key = base64.b64encode(os.urandom(24))
+        debug = False
 
-app.secret_key = secret_key
+app.secret_key = config.secret_key
+app.debug = config.debug
 
 # Blueprints #
 user.get_users(app)

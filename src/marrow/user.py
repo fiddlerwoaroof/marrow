@@ -1,4 +1,5 @@
 import flask
+from flask.ext.cors import cross_origin
 from flask import Blueprint, session, redirect, url_for, escape, request, abort, g
 from . import database
 import json
@@ -71,7 +72,12 @@ def adduser():
 def checkuser():
     return json.dumps('username' in session)
 
+import os, base64
+def gen_ak(db):
+    return ak
+
 @user_blueprint.route('/login', methods=['POST'])
+@cross_origin(allow_headers='Content-Type')
 def login():
     obj = request.get_json();
     result = False
@@ -79,8 +85,15 @@ def login():
     user = users.get(username, {})
     rightPassword = user.get('password',None)
     if password == rightPassword:
-        session['username'] = username
-        result = True
+        if 'ak' in request.args and request.args['ak']:
+            ak = base64.b64encode(os.urandom(24))
+            with database.get_db() as db:
+                with db.cursor() as cur:
+                    cur.callproc('put_ak', (username, ak))
+            result = {'success': True, 'ak': ak}
+        else:
+            session['username'] = username
+            result = True
     return json.dumps(result)
 
 @user_blueprint.route('/logout')

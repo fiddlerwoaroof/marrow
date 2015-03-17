@@ -2,6 +2,7 @@ import flask
 from flask import Blueprint, session, redirect, url_for, escape, request, abort, g
 from flask.ext.cors import cross_origin
 from . import database
+import urlparse
 import json
 
 bone_blueprint = Blueprint('bone', __name__)
@@ -24,17 +25,30 @@ def delete_link(linkid):
     db.commit()
     return json.dumps(result)
     
+def clean_url(url):
+    scheme, netloc, path, params, query, fragment = urlparse.urlparse(url, 'http')
+    if path and not netloc:
+        netloc, path = path, netloc
+    return urlparse.urlunparse((scheme, netloc, path, params, query, fragment))
 
 @bone_blueprint.route('/add', methods=['POST'])
 @bone_blueprint.route('/submit', methods=['POST'])
-@cross_origin()
+@cross_origin(allow_headers='Content-Type')
 def submit_link():
     result = dict(success=False, id={});
-    if 'username' in session:
+    username = None
+    db = database.get_db()
+    if 'username' in request.args:
+        _username = request.args['username']
+        if database.check_ak(db, _username, request.args.get('ak', object())): 
+            username = _username
+    elif 'username' in session:
+        username = session['username']
+
+    if username is not None:
         obj = request.get_json()
         url, title = obj['url'],obj['title']
-        username = session['username']
-        db = database.get_db()
+        url = clean_url(url)
         with db.cursor() as cur:
             cur.callproc('put_link', (username, url, title))
             ## This returns (link_id, user_id)

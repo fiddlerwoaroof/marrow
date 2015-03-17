@@ -142,5 +142,27 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+DROP FUNCTION IF EXISTS put_ak(text,text);
+CREATE OR REPLACE FUNCTION put_ak(username text, supplied_ak text) RETURNS text
+AS $$
+DECLARE
+  uid INT;
+BEGIN
+  SELECT INTO uid id FROM users WHERE name = username;
+  INSERT INTO user_ak (user_id,ak) VALUES (uid,supplied_ak);
+  RETURN supplied_ak;
+END
+$$ LANGUAGE plpgsql;
 
-
+DROP FUNCTION IF EXISTS check_ak(text,text);
+CREATE OR REPLACE FUNCTION check_ak(username text, supplied_ak text) RETURNS TEXT
+AS $$
+DECLARE
+  uid INT;
+  result TEXT;
+BEGIN
+  SELECT INTO uid id FROM users WHERE name = username;
+  DELETE FROM user_ak WHERE user_id=uid AND user_ak.ak=supplied_ak RETURNING user_ak.ak INTO result;
+  RETURN result;
+END
+$$ LANGUAGE plpgsql

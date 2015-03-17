@@ -1,5 +1,7 @@
+DROP TABLE IF EXISTS user_ak;
 DROP TABLE IF EXISTS user_subscriptions;
-DROP TABLE IF EXISTS user_links; DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS user_links;
+DROP TABLE IF EXISTS users;
 CREATE TABLE users (
   id SERIAL UNIQUE NOT NULL,
   name TEXT UNIQUE NOT NULL,
@@ -35,3 +37,11 @@ CREATE TABLE user_links (
   PRIMARY KEY (id)
 );
 
+CREATE TABLE user_ak (
+  id SERIAL UNIQUE NOT NULL,
+  generated TIMESTAMP DEFAULT current_timestamp,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  ak TEXT NOT NULL,
+  UNIQUE (user_id, ak),
+  PRIMARY KEY (id)
+);
