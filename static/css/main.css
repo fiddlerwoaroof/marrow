@@ -3,8 +3,9 @@ http://marrow.elangley.org/css/main.css */
 
 @import url(//fonts.googleapis.com/css?family=Lato:400,700,400italic);
 @import url(//fonts.googleapis.com/css?family=Oxygen:400,700,400italic);
-@import url(//fonts.googleapis.com/css?family=Quicksand:400,700);
 @import url(//fonts.googleapis.com/css?family=Josefin+Sans:400,700,400italic);
+@import url(http://fonts.googleapis.com/css?family=Ek+Mukta:200,400,800&subset=latin,latin-ext);
+@import url(//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css);
 
 /* @group Browser Resets */
 
@@ -16,7 +17,7 @@ html {
 }
 
 * {
-  box-sizing: border-box !important;
+  box-sizing: border-box;
 }
 
 body {
@@ -41,9 +42,6 @@ h1, h2, h3, h4 {
 a {
   text-decoration: none;
   color: blue;
-  transition-property: color;
-  transition-duration: .2s;
-  transition: .2s;
 }
 
 img {
@@ -54,34 +52,34 @@ img {
 
 /* @end */
 
-
-body {
-  font-family: 'Josefin Sans', sans-serif;
-}
+/* @group State Definitions */
 
 .is-hidden {
   display: none;
 }
 
-#login_form {
-  z-index: 100;
-  background: white;
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  top: 0px;
-  left: 0px;
+/* @end */
+
+/* @group General Definitions */
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 800;
 }
-#login_form form {
-  position: absolute;
-  top: 25%;
-  left: 25%;
+
+body {
+  font-family: 'Ek Mukta', sans-serif;
+  font-weight: 400;
 }
+
+/* @end */
+
+/* @group Header Module */
 
 header {
   padding: 20px;
   background: #300;
   background: #000;
+  font-family: 'Josefin Sans', sans-serif;
 }
 
 header .site-logo {
@@ -93,27 +91,85 @@ header .site-logo {
   margin: .2em 0 -.1em;
 }
 
-a.user-link {
-  color: inherit;
+/* @end */
+
+/* @group Navigation Module */
+
+#nav-main .logout-link {
+  margin-top: 10px;
 }
 
-#main h2 {
+/* @end */
+
+/* @group List Module */
+
+main h2 {
   margin-bottom: 10px;
   font-size: 24px;
   padding-left: 0;
 }
-#main ul {
+main ul {
   position: relative;
 }
 
-#main form {
-  padding-top: 5px;
-  width: 350px;
+main form {
+  padding: 10px 0;
 }
-#main form input[type="text"] {
+main form input[type="text"] {
   width: 315px;
 }
+.bone-list li {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding-right: 1em;
+}
+/* @end */
 
+/* @group Login Module */
+
+#login_form {
+  position: absolute;
+  z-index: 100;
+  height: 100%;
+  background: white;
+}
+#login_form form {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  text-align: center;
+}
+
+/* @end */
+
+/* @group Link Styling */
+
+a {
+  transition-property: color;
+  transition-duration: .2s;
+}
+
+a:link, a:visited, a:hover, a:active, a:focus {
+  color: black;
+}
+a:link, a:visited {
+  
+}
+a:hover, a:active, a:focus {
+  text-decoration: underline;
+}
+a.delete-link {
+  color: red;
+}
+a.delete-link:hover {
+  text-decoration: none;
+  color: brown;
+}
+/* @end */
+
+/* Generic Large Devices */
 @media (min-width: 443px) {
 
   #nav-main {
@@ -125,8 +181,8 @@ a.user-link {
     margin-top: 150px;
   }
 
-  #main {
-    margin-top: 100px;
+  main {
+    padding-top: 100px;
     position: absolute;
     height: 100%;
     top: 0px;
@@ -138,76 +194,109 @@ a.user-link {
     text-align: right;
     padding-right: 5px;
   }
+  
+  #login_form {
+    width: 125%;
+    left: -25%;
+    top: 66px;
+  }
+  #login_form form {
+    margin-top: 100px;
+  }
 
 }
 
+/* Generic Small Devices */
 @media (max-width: 443px) {
 
-  body {
-    padding-left: 5px;
+  header {
+    padding: 9px;
+    height: 40px;
+  }
+  
+  header .site-logo {
+    font-size: 20px;
+    margin: .2em 0 -.1em;
+  }
+
+  main {
+    padding-left: .5em;
   }
 
   #nav-main {
     position: fixed;
-    height: 70px;
     background: #fff;
+    height: 100%;
     width: 100%;
     top: 0px;
     margin: 0 auto;
     padding: 10px;
+    visibility: hidden;
   }
-
-  #nav-main ul {
-    position: relative;
+  
+  #nav-main:after {
+    font-family: "FontAwesome";
+    font-size: 20px;
+    padding: 10px;
+    content: "\f0c9";
     display: block;
-    clear: both;
+    color: white;
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    line-height: 22px;
+    top: 0;
+    left: 0;
+    visibility: visible;
+    box-sizing: border-box;
+  }
+  #nav-main ul {
+    position: fixed;
+    background: white;
+    top: 40px;
+    left: 0;
+    height: 100%;
     width: 100%;
+    z-index: 10;
+  }
+  #nav-main:hover ul {
+    visibility: visible;
+  }
+  #nav-main li {
     text-align: center;
   }
-
-  #nav-main ul li {
-    display: inline-block;
+  #nav-main a {
+    width: 100%;
+    display: block;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+    text-decoration: none;
+  }
+  #nav-main a:hover, #nav-main a:active, #nav-main a:focus {
     background: #ddd;
-    padding: 5px 10px;
+  }
+  
+  #nav-main .logout-link {
+    margin-top: 40px;
+    border-top: 1px solid #ddd;
+  }
+  
+  #login_form {
+    width: 100%;
+    left: 0;
+    top: 0;
+  }
+  #login_form form {
+    margin-top: 20px;
+  }
+  form input[type="password"] {
   }
 
-  #main {
+  main {
     position: absolute;
-    overflow-y: auto;
     width: 100%;
     margin-top: 75px;
+    /*overflow: hidden;*/
   }
-
-  /*  # main ul li {
-  min-height: 50px;
-  background: black;
-  }
-  */
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-#nav-main logout-link {
-  margin-top: 10px;
-}
-
-a.link, a.delete-link {
-  cursor: pointer;
-  -webkit-user-select: none; /* Chrome/Safari */    
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* IE10+ */
-  /* Rules below not implemented in browsers yet */
-  -o-user-select: none;
-  user-select: none;
-}
-
-a.delete-link {
-  color: red;
-  cursor: pointer;
-}
-a.delete-link:hover {
-  text-decoration: none;
-  color: brown;
+  
 }
