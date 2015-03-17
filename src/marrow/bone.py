@@ -38,15 +38,18 @@ def submit_link():
     result = dict(success=False, id={});
     username = None
     db = database.get_db()
-    if 'username' in request.args:
+    obj = request.get_json()
+    if 'username' in obj:
         _username = request.args['username']
-        if database.check_ak(db, _username, request.args.get('ak', object())): 
+        if 'ak' in obj and database.check_ak(db, _username, obj['ak']): 
             username = _username
+        else:
+            abort(401);
+            return
     elif 'username' in session:
         username = session['username']
 
     if username is not None:
-        obj = request.get_json()
         url, title = obj['url'],obj['title']
         url = clean_url(url)
         with db.cursor() as cur:
