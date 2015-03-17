@@ -164,14 +164,18 @@ a:link, a:visited {
 a:hover, a:active, a:focus {
   text-decoration: underline;
 }
+div.marrow {
+  display: inline-block;
+  vertical-align: top;
+}
 a.de-emphasize {
   font-size: 80%;
   color: #aaa;
 }
 a.delete-link {
   color: red;
-  position: absolute;
-  margin-left: -1em;
+  /*position: absolute;*/
+  /*margin-left: -1em;*/
 }
 a.delete-link:hover {
   text-decoration: none;
