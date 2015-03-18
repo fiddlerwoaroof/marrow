@@ -183,6 +183,14 @@ a.delete-link:hover {
 }
 /* @end */
 
+#nav-main {
+  visibility: hidden;
+}
+
+body.is-logged-on #nav-main {
+  visibility: visible;
+}
+
 /* Generic Large Devices */
 @media (min-width: 443px) {
 

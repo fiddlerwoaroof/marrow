@@ -11,6 +11,17 @@ function deleteLink($scope) {
   };
 }
 
+function check_login() {
+  injector = angular.injector(['ng']);
+  $http = injector.get('$http');
+  return $http.get("/api/user/check").success(function(is_loggedon) {
+    is_loggedon = JSON.parse(is_loggedon);
+    console.log(is_loggedon);
+    if (is_loggedon === true) {
+      angular.element(document.body).addClass('is-logged-on');
+    }
+  });
+}
 
 // from http://stackoverflow.com/questions/15324039/how-to-create-a-url-for-link-helper-in-angularjjs
 marrowApp.run(function($route, $rootScope) {
@@ -53,8 +64,7 @@ marrowApp.config(['$locationProvider',
 ]);
 
 marrowApp.controller('LoginCtrl', function ($scope,$http,$route,$location) {
-  $http.get("/api/user/check")
-  .success(
+  check_login().success(
     function(is_loggedon) {
       is_loggedon = JSON.parse(is_loggedon);
       if (is_loggedon) { $location.url('/');}
@@ -100,7 +110,7 @@ function controllerFactory(name, getendpoint, cb, afterGet) {
       });
     };
 
-    $http.get("/api/user/check").success(
+    check_login().success(
       function(is_loggedon) {
         is_loggedon = JSON.parse(is_loggedon);
         if (!is_loggedon) { $location.url('/login');}
@@ -142,6 +152,7 @@ function subscribe($http,$scope) {
 }
 
 marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams) {
+  check_login();
   $scope.url = "";
   $scope.title = "";
   $scope.unsubscribe = unsubscribe($http, $scope);
