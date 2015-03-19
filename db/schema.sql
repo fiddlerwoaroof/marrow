@@ -4,7 +4,7 @@ DROP TABLE IF EXISTS user_links;
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
   id SERIAL UNIQUE NOT NULL,
-  name TEXT UNIQUE NOT NULL,
+  name TEXT UNIQUE NOT NULL CHECK (name <> ''),
   password TEXT NOT NULL,
   email TEXT NOT NULL,
   PRIMARY KEY (id)

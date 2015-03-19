@@ -1,4 +1,5 @@
-from flask import Flask, g
+from flask import Flask, g, request
+from flask_limiter import Limiter
 import os
 import base64
 
@@ -19,6 +20,10 @@ except ImportError:
 
 app.secret_key = config.secret_key
 app.debug = config.debug
+
+limiter = Limiter(app)
+limiter.limit("60/hour 3/second", key_func=lambda: request.host)(user.user_blueprint)
+limiter.limit("dd")(user.user_blueprint)
 
 # Blueprints #
 user.get_users(app)

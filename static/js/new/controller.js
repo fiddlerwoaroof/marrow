@@ -64,6 +64,8 @@ marrowApp.config(['$locationProvider',
 ]);
 
 marrowApp.controller('LoginCtrl', function ($scope,$http,$route,$location) {
+  $scope.message = '';
+
   check_login().success(
     function(is_loggedon) {
       is_loggedon = JSON.parse(is_loggedon);
@@ -77,8 +79,8 @@ marrowApp.controller('LoginCtrl', function ($scope,$http,$route,$location) {
     console.log(postObj);
     $http.post("/api/user/add", postObj)
     .success(function(added_user) {
-      added_user = JSON.parse(added_user);
-      if(added_user === true) {$location.url('/');}
+      if (added_user.status === true) {$location.url('/');}
+      else {$scope.message = added_user.message;}
     });
   };
 
@@ -89,10 +91,9 @@ marrowApp.controller('LoginCtrl', function ($scope,$http,$route,$location) {
     $http.post("/api/user/login", {"username":username, "password":password})
     .success(
       function (login_succeeded) {
-        login_succeeded = JSON.parse(login_succeeded);
         var el = angular.element(document.querySelector('#login_form'));
-        if (login_succeeded === true) {el.removeClass('is-hidden');}
-        $location.url('/');
+        if (login_succeeded.status === true) {$location.url('/');}
+        else {$scope.message = login_succeeded.message;}
     });
   };
 });
@@ -231,7 +232,9 @@ marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route) {
   };
 
   $scope.logout = function() {
-    $http.get('/api/user/logout').finally(function() { $location.url('/login'); });
+    $http.get('/api/user/logout').success(function() {
+      $location.url('/login');
+    });
   };
 });
 

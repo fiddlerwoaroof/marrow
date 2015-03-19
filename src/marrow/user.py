@@ -1,8 +1,12 @@
-import flask
-from flask.ext.cors import cross_origin
-from flask import Blueprint, session, redirect, url_for, escape, request, abort, g
-from . import database
 import json
+
+import flask
+from flask import Blueprint, session, redirect, url_for, escape, request, abort, g
+from flask_limiter import Limiter
+from flask.ext.cors import cross_origin
+import psycopg2
+
+from . import database
 
 user_blueprint = Blueprint('user', __name__)
 
@@ -58,17 +62,32 @@ def subscribe(username):
 @user_blueprint.route('/add', methods=['POST'])
 def adduser():
     db = database.get_db()
+    result = {'status': False, 'message': ''}
     with db.cursor() as cur:
         obj = request.get_json();
-        username, password = obj['username'], obj['password']
-        username = username.strip().lower()
-        password = password.strip()
-        cur.execute('INSERT INTO users (name,password,email) VALUES (%s,%s,%s)',
-                    (username, password, 'abc@def.com'))
-        _get_users()
-        db.commit()
-        session['username'] = username
-        return json.dumps(True)
+        try:
+            username, password = obj['username'], obj['password']
+        except KeyError:
+            print obj
+            result['message'] = 'Username required' if 'username' not in obj else 'Password required'
+        else:
+            username = username.strip().lower()
+            password = password.strip()
+            try:
+                cur.execute('INSERT INTO users (name,password,email) VALUES (%s,%s,%s)',
+                            (username, password, 'abc@def.com'))
+                session['username'] = username
+                result['status'] = True
+                _get_users()
+            except psycopg2.IntegrityError as e:
+                db.rollback()
+                if e.pgcode == '23505': #username not unique
+                    result['message'] = 'Username in use'
+                elif e.pgcode == '23502': #username empty
+                    result['message'] = 'Username required'
+                else: raise
+            else: db.commit()
+    return json.dumps(result)
 
 @user_blueprint.route('/check')
 def checkuser():
@@ -82,7 +101,7 @@ def gen_ak(db):
 @cross_origin(allow_headers='Content-Type')
 def login():
     obj = request.get_json();
-    result = False
+    result = {'status': False, 'message': ''}
     username, password = obj['username'], obj['password']
     username = username.strip().lower()
     password = password.strip()
@@ -97,7 +116,9 @@ def login():
             result = {'success': True, 'ak': ak}
         else:
             session['username'] = username
-            result = True
+            result['status'] = True
+    else:
+        result['message'] = 'Wrong Username or Password'
     return json.dumps(result)
 
 @user_blueprint.route('/logout')

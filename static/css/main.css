@@ -132,6 +132,13 @@ main form input[type="text"] {
 
 /* @group Login Module */
 
+#login_form div.message{
+  position: absolute;
+  background: red;
+  width: 100%;
+  text-align: center;
+}
+
 #login_form {
   position: absolute;
   z-index: 100;
@@ -222,6 +229,9 @@ body.is-logged-on #nav-main {
     left: -25%;
     top: 66px;
   }
+  #login_form div.message{
+    top: -33px;
+  }
   #login_form form {
     margin-top: 100px;
   }
@@ -310,6 +320,9 @@ body.is-logged-on #nav-main {
   }
   #login_form form {
     margin-top: 20px;
+  }
+  #login_form div.message{
+    margin-top 10px;
   }
   form input[type="password"] {
   }
