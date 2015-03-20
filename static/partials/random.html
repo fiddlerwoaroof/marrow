@@ -8,8 +8,8 @@
       <a href="{{marrow.url}}" class="{{marrow.title? 'de-emphasize' : ''}}" >{{marrow.url}}</a>
     </li>
   </ul>
-  <button type="submit" ng-class="subscribeClass"   ng-click="subscribe()">Subscribe</button>
-  <button type="submit" ng-class="unsubscribeClass" ng-click="unsubscribe()" >unSubscribe</button>
+  <button type="submit" ng-class="subscribeClass? subscribeClass: is-hidden"   ng-click="subscribe()">Subscribe</button>
+  <button type="submit" ng-class="unsubscribeClass ? unsubscribeClass: is-hidden" ng-click="unsubscribe()" >unSubscribe</button>
 </section>
 
 
