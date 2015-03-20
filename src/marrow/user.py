@@ -2,7 +2,6 @@ import json
 
 import flask
 from flask import Blueprint, session, redirect, url_for, escape, request, abort, g
-from flask_limiter import Limiter
 from flask.ext.cors import cross_origin
 import psycopg2
 

@@ -93,6 +93,32 @@ header .site-logo {
 
 /* @end */
 
+/* @group Footer */
+
+footer {
+  position: fixed;
+  height: 3em;
+  bottom: 0px;
+  width: 100%;
+  background: white;
+  text-align: center;
+  padding: 0.5em 0em;
+}
+
+footer a.facebook-link {
+  color: blue;
+  padding: 0px 7px;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+footer a.facebook-link:hover {
+  background: blue;
+  color: white;
+}
+
+/* @end */
+
 /* @group Navigation Module */
 
 #nav-main .logout-link {
