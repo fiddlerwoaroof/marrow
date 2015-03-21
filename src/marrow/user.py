@@ -99,8 +99,7 @@ def adduser():
     return json.dumps(result)
 
 @user_blueprint.route('/check')
-def checkuser():
-    return json.dumps('username' in session)
+def checkuser(): return json.dumps('username' in session)
 
 import os, base64
 def gen_ak(db):
