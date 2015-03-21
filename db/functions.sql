@@ -1,3 +1,19 @@
+DROP FUNCTION IF EXISTS get_subscriptions(text);
+CREATE OR REPLACE FUNCTION get_subscriptions(username text) RETURNS
+  TABLE(name text) AS $$
+DECLARE
+  uid INT;
+BEGIN
+  SELECT INTO uid id FROM users WHERE users.name=username;
+  RETURN QUERY SELECT users.name FROM user_subscriptions
+    RIGHT JOIN users ON users.id = to_id
+    WHERE fro_id=uid
+    ORDER BY users.name
+    ;
+END
+$$ LANGUAGE plpgsql;
+
+
 DROP FUNCTION IF EXISTS delete_link(text,int);
 CREATE OR REPLACE FUNCTION delete_link(username text, linkid int)
   RETURNS bool AS $$
@@ -16,7 +32,7 @@ $$ LANGUAGE plpgsql;
 
 DROP FUNCTION IF EXISTS get_bones(text);
 CREATE OR REPLACE FUNCTION get_bones(username text)
-  RETURNS TABLE(name text, url text, title text, posted timestamp) AS $$
+  RETURNS TABLE(url text, title text, posted timestamp, poster text) AS $$
 DECLARE
   subscriber_id int;
 BEGIN
@@ -26,11 +42,12 @@ BEGIN
     AS
       SELECT
         DISTINCT ON (links.url)
-        users.name,links.url,links.title,links.posted
+        links.url,links.title,links.posted,users1.name
         FROM user_subscriptions
         RIGHT JOIN user_links ON user_subscriptions.to_id=user_links.user_id
         INNER JOIN links ON link_id=links.id
         INNER JOIN users ON users.id=fro_id
+        LEFT JOIN users as users1 ON users1.id=to_id
         WHERE fro_id = subscriber_id;
   RETURN QUERY SELECT * FROM middle ORDER BY middle.posted DESC;
 END
@@ -38,7 +55,7 @@ $$ LANGUAGE plpgsql;
 
 DROP FUNCTION IF EXISTS get_bone(text);
 CREATE OR REPLACE FUNCTION get_bone(username text)
-  RETURNS TABLE(name text, url text, title text, posted timestamp, linkid int) AS $$
+  RETURNS TABLE(name text, url text, title text, posted timestamp, linkid int, poster text) AS $$
 BEGIN
   RETURN QUERY SELECT users.name, links.url, links.title, links.posted, links.id
       FROM users

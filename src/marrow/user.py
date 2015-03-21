@@ -98,6 +98,17 @@ def adduser():
             else: db.commit()
     return json.dumps(result)
 
+@user_blueprint.route('/following')
+def following():
+    result = dict(status=False, data=[])
+    if 'username' in session:
+        username = session['username']
+        with database.get_db() as db:
+            with db.cursor() as cur:
+                cur.callproc('get_subscriptions', (username,))
+                result['data'] = [x[0] for x in cur.fetchall()]
+
+    return json.dumps(result)
 @user_blueprint.route('/check')
 def checkuser(): return json.dumps('username' in session)
 

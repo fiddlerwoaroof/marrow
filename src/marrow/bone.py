@@ -125,10 +125,10 @@ def subscriptions():
     if 'username' in session:
         username = session['username']
         with database.get_db().cursor() as cur:
-            cur.execute("SELECT url, title, posted from get_bones(%s);", (username,))
+            cur.execute("SELECT poster, url, title, posted from get_bones(%s);", (username,))
             result['marrow'] = [
-                    dict(url=url,title=title,posted=posted.isoformat())
-                        for url,title,posted
+                    dict(poster=poster, url=url,title=title,posted=posted.isoformat())
+                        for poster,url,title,posted
                         in cur.fetchall()
             ]
     return json.dumps(result)

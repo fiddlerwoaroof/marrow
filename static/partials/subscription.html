@@ -1,7 +1,17 @@
 <section id="main">
   <h2 class="section-title">{{sectionTitle}}</h2>
+  <form>
+    <ul class="subscription-list">
+      <li>
+        <input type="radio" ng-model="friend" ng-value="">[Everyone]</input>
+      </li>
+      <li ng-repeat="friend in friends.data">
+        <input type="radio" ng-model="$parent.friend" ng-value="friend">{{friend}}</input>
+      </li>
+    </ul>
+  </form>
   <ul class="bone-list">
-    <li ng-repeat="marrow in bone" class="bone-item" data-id="{{marrow.id}}" data-url="{{marrow.url}}" data-posted="{{marrow.posted}}" data-title="{{marrow.title}}">
+    <li ng-repeat="marrow in bone | filter:{poster:friend}:emptyOrEquals" class="bone-item" data-id="{{marrow.id}}" data-url="{{marrow.url}}" data-posted="{{marrow.posted}}" data-title="{{marrow.title}}" data-poster="{{marrow.poster}}">
       <span ng-if="marrow.title"><a href="{{marrow.url}}" class="list-item" >{{marrow.title}}</a><br /></span>
       <a href="{{marrow.url}}" class="{{marrow.title? 'de-emphasize' : ''}}" >{{marrow.url}}</a>
     </li>

@@ -52,6 +52,10 @@ img {
 
 /* @end */
 
+ul.subscription-list li{
+  display: inline;
+}
+
 /* @group State Definitions */
 
 .is-hidden {

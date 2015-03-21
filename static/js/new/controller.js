@@ -1,4 +1,4 @@
-var marrowApp = angular.module('marrowApp', ['ngRoute']);
+var marrowApp = angular.module('marrowApp', ['ngRoute', 'marrowApp.services']);
 
 var compareTo = function() { return {
   require: "ngModel",
@@ -141,11 +141,14 @@ marrowApp.controller('RootCtrl', function ($scope,$http,$location,$route) {
   });
 });
 
+
 function controllerFactory(name, getendpoint, cb, afterGet) {
-  marrowApp.controller(name, function ($scope,$http,$location,$route) {
+  marrowApp.controller(name, function ($scope,$http,$location,$route, SubscribedTo) {
+    q = $scope;
     $scope.url = "";
     $scope.title = "";
     $scope.sectionTitle = "";
+    $scope.friends = SubscribedTo.get();
 
     $scope.update = function() {
       return $http.get(getendpoint).success(function(data) {
@@ -163,10 +166,10 @@ function controllerFactory(name, getendpoint, cb, afterGet) {
       $scope.update().success(function(data) {
         $scope.sectionTitle = data.sectionTitle;
         $scope.bone = data.marrow;
-        if (afterGet !== undefined) {afterGet($scope,$http,$route);}
+        if (afterGet !== undefined) {afterGet($scope,$http,$route, null, SubscribedTo);}
       });
 
-      if (cb !== undefined) {cb($scope,$http,$route);}
+      if (cb !== undefined) {cb($scope,$http,$route, null, SubscribedTo);}
     });
   });
 }
@@ -272,7 +275,13 @@ controllerFactory('RandomMarrowCtrl', '/api/bones/random',
   });
 });
 
-controllerFactory('SubscriptionCtrl', '/api/bones/subscriptions');
+controllerFactory('SubscriptionCtrl', '/api/bones/subscriptions', 
+  function($scope, $http, Bones, SubscribedTo){
+    $scope.emptyOrEquals = function(actual, expected) {
+      if (!expected) { return true;}
+      else {return actual === expected;}
+    };
+  });
 
 marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route) {
   $scope.random = function() {
