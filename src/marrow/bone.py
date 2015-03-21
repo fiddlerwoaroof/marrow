@@ -139,8 +139,13 @@ def random():
     db = database.get_db()
     with db.cursor() as cur:
         if 'username' in session:
-            cur.execute('SELECT name FROM users WHERE name != %s ORDER BY random() LIMIT 1',
-                    (session['username'],))
+            exclude = [session['username']]
+            if 'last' in request.args:
+                exclude.append(request.args['last'])
+            cur.execute(
+                'SELECT name FROM users WHERE name NOT IN  %s ORDER BY random() LIMIT 1',
+                (tuple(exclude),)
+            )
         else:
             cur.execute('SELECT name FROM users ORDER BY random() LIMIT 1')
         username = cur.fetchone()[0]
