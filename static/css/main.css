@@ -95,25 +95,20 @@ header .site-logo {
 
 /* @group Footer */
 
-#footer-spacer {
-  height: 2.3em;
-}
-
 footer {
   position: fixed;
-  height: 2.3em;
+  height: 1.5em;
   bottom: 0px;
   width: 100%;
-  background: hsl(0,0%,97%);
+  background: hsl(0,0%,90%);
   text-align: center;
-  padding: 0.5em 0em;
+  padding: 0.em 0em;
 }
 
 footer a.facebook-link {
   color: blue;
-  padding: 0px 7px;
+  padding: 0px 2px;
   text-decoration: none;
-  border-radius: 4px;
 }
 
 footer a.facebook-link:hover {
