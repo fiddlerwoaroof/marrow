@@ -185,6 +185,14 @@ main form input[type="text"] {
 
 /* @end */
 
+/* @group Form Validation */
+
+input.ng-invalid, button.ng-invalid {
+  box-shadow: 1px 1px red;
+}
+
+/* @end */
+
 /* @group Link Styling */
 
 a {
