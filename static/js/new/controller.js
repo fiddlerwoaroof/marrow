@@ -174,6 +174,28 @@ function controllerFactory(name, getendpoint, cb, afterGet) {
   });
 }
 
+function toggleSubscribe($http,$scope) {
+  return function () {
+    var postObj = {"from":$scope.sectionTitle, "to":$scope.sectionTitle};
+    var promise = null;
+
+    if ($scope.subscribed) {
+      promise = $http.post('/api/bones/unsubscribe', postObj);
+    } else {
+      promise = $http.post('/api/bones/subscribe', postObj);
+    }
+    
+    return promise.success(function(result) {
+        console.log('bing!');
+        result = JSON.parse(result);
+        if (result) {
+          $scope.subscribed = ! $scope.subscribed;
+          $scope.subscribeLabel = $scope.subscribed? 'unSubscribe': 'Subscribe';
+        }
+      });
+  };
+}
+
 function unsubscribe($http,$scope) {
   return function () {
     var postObj = {"from":$scope.sectionTitle};
@@ -213,14 +235,11 @@ marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams) {
   check_login();
   $scope.url = "";
   $scope.title = "";
-  $scope.unsubscribe = unsubscribe($http, $scope);
-  $scope.subscribe = subscribe($http, $scope);
+  $scope.toggleSubscribe = toggleSubscribe($http, $scope);
+
   $scope.delete = deleteLink($scope);
-  $scope.subscribeClass = 'is-hidden';
-  $scope.unsubscribeClass = 'is-hidden';
 
   $scope.addLink = function(url) {
-    console.log(url);
     var postObj = {"url":url, "title":$scope.title};
     $http.post('/api/bones/add', postObj).success(function(data) {
       if (data.success) {
@@ -249,8 +268,8 @@ marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams) {
         $scope.templateUrl = "/partials/default.html";
       } else {
         $scope.templateUrl = "/partials/random.html";
-        if (result.follows === true) {$scope.unsubscribeClass = '';}
-        else if (result.follows === false) {$scope.subscribeClass = '';}
+        $scope.subscribed = result.follows;
+        $scope.subscribeLabel = $scope.subscribed ? 'unSubscribe': 'Subscribe';
       }
   }).success(function (){
     $http.get(getendpoint).success(function(data) {
@@ -265,13 +284,16 @@ controllerFactory('RandomMarrowCtrl', '/api/bones/random',
   function($scope,$http) {
     $scope.subscribe = subscribe($http, $scope);
     $scope.unsubscribe = unsubscribe($http, $scope);
-    $scope.subscribeClass = 'is-hidden';
-    $scope.unsubscribeClass = 'is-hidden';
+
+    $scope.subscribed = false;
+    $scope.subscribeLabel = 'Subscribe';
+    $scope.toggleSubscribe = toggleSubscribe($http, $scope);
+
   },
   function ($scope,$http) {
     $http.get('/api/user/follows/'+$scope.sectionTitle).success(function(result) {
-      if (result.follows === true) {$scope.unsubscribeClass = '';}
-      else if (result.follows === false) {$scope.subscribeClass = '';}
+      $scope.subscribed = result.follows;
+      $scope.subscribeLabel = $scope.subscribed ? 'unSubscribe': 'Subscribe';
   });
 });
 

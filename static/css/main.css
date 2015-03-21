@@ -52,6 +52,12 @@ img {
 
 /* @end */
 
+.sub-ctrl {
+  display: inline-block;
+  vertical-align: middle;
+  width: 9em;
+}
+
 ul.subscription-list {
   text-align: center;
   background: #eee;

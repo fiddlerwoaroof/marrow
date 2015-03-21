@@ -1,5 +1,6 @@
 <section id="main">
   <h2 class="section-title">
+    <button type="submit" ng-class="['sub-ctrl']"   ng-click="toggleSubscribe()">{{subscribeLabel}}</button>
     <a class="user-link" ng-href="{{path('UserCtrl', {'user': sectionTitle})}}">{{path('UserCtrl', {'user': sectionTitle})}}</a>
   </h2>
   <ul class="bone-list">
@@ -8,8 +9,6 @@
       <a href="{{marrow.url}}" class="{{marrow.title? 'de-emphasize' : ''}}" >{{marrow.url}}</a>
     </li>
   </ul>
-  <button type="submit" ng-class="subscribeClass? subscribeClass: is-hidden"   ng-click="subscribe()">Subscribe</button>
-  <button type="submit" ng-class="unsubscribeClass ? unsubscribeClass: is-hidden" ng-click="unsubscribe()" >unSubscribe</button>
 </section>
 
 
