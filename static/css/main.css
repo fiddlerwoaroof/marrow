@@ -52,6 +52,11 @@ img {
 
 /* @end */
 
+ul.subscription-list {
+  text-align: center;
+  background: #eee;
+}
+
 ul.subscription-list li{
   display: inline;
 }
