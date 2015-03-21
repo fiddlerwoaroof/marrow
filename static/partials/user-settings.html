@@ -1,0 +1,11 @@
+<h1>User Settings</h1>
+<div id="change-password-form">
+  <h2>Change Password</h2>
+  <form name="cpassform" ng-submit='changePassword()' novalidate>
+    <div class="message">{{message}}</div>
+    <input type="text" ng-model="oldPassword" placeholder="Old Password" required/>
+    <input type="text" ng-model="newPassword" placeholder="New Password" required/>
+    <input type="text" ng-model="confirm" placeholder="Confirm Password" required compare-to="newPassword"/>
+    <button ng-disabled="!cpassform.$valid">Change Password</button>
+  </form>
+</div>

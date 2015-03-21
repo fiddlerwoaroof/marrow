@@ -13,14 +13,24 @@ users = {}
 def get_users(app):
     with app.app_context(): _get_users()
 
-def _get_users():
+def _get_users(db=None):
     global users
-    cur = database.get_db().cursor()
-    with cur:
-        cur.execute('SELECT name,password,email FROM users')
-        for username,password,email in cur.fetchall():
-            users[username] = dict(username=username, password=password, email=email)
-    
+    cleanup = False
+    if db is None:
+        db = database.get_db()
+        cleanup = True
+    try:
+        cur = db.cursor()
+        with cur:
+            cur.execute('SELECT name,password,email FROM users')
+            for username,password,email in cur.fetchall():
+                users[username] = dict(username=username, password=password, email=email)
+    except:
+        if cleanup: db.rollback()
+        raise
+    else:
+        if cleanup: db.commit()
+
 #TODO: load this from somewhere
 user_env = {}
 @user_blueprint.route('/environment')
@@ -43,7 +53,7 @@ def follows(to):
             result['me'] = session['username']
         db.commit()
     return json.dumps(result)
-        
+
 @user_blueprint.route('/subscribe/<username>', methods=['POST'])
 def subscribe(username):
     if 'username' in session:
@@ -95,6 +105,28 @@ def checkuser():
 import os, base64
 def gen_ak(db):
     return ak
+
+@user_blueprint.route('/<user>/env', methods=['POST'])
+def getenv(user): pass
+
+@user_blueprint.route('/change-password', methods=['POST'])
+def changepass():
+    obj = request.get_json();
+    result = dict(status=False, message='')
+    if 'username' in session:
+        username, old_password, new_password = session['username'], obj['old_password'], obj['new_password']
+        user = users[username]
+        if old_password == user['password']:
+            with database.get_db() as db:
+                with db.cursor() as cur:
+                    cur.execute('UPDATE users SET password=%s WHERE name=%s', (new_password, username))
+                    _get_users(db)
+                    result['status'] = True
+        else:
+            result['message'] = 'Wrong Username or Password'
+    else:
+        result['message'] = 'Wrong Username or Password'
+    return json.dumps(result)
 
 @user_blueprint.route('/login', methods=['POST'])
 @cross_origin(allow_headers='Content-Type')

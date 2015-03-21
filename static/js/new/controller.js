@@ -1,5 +1,20 @@
 var marrowApp = angular.module('marrowApp', ['ngRoute']);
 
+var compareTo = function() { return {
+  require: "ngModel",
+  scope: { otherModelValue: "=compareTo" },
+  link: function(scope, element, attributes, ngModel) {
+    ngModel.$validators.compareTo = function(modelValue) {
+      return modelValue == scope.otherModelValue;
+    };
+    scope.$watch("otherModelValue", function() {
+      ngModel.$validate();
+    });
+  }
+};};
+
+marrowApp.directive("compareTo", compareTo);
+
 function deleteLink($scope) {
   injector = angular.injector(['ng']);
   $http = injector.get('$http');
@@ -48,12 +63,12 @@ marrowApp.run(function($route, $rootScope) {
 marrowApp.config(['$routeProvider',
   function($routeProvider) {
     $routeProvider.
-      when('/random', {templateUrl: 'partials/random.html', controller: 'RandomMarrowCtrl'}).
-      when('/subscriptions', {templateUrl: 'partials/subscription.html', controller: 'SubscriptionCtrl'}).
-      when('/user/:user', {template: '<div ng-include="templateUrl">Loading...</div>', controller: 'UserCtrl'}).
-      
       when('/login', {templateUrl: 'partials/login.html', controller: 'LoginCtrl'}).
-      when('/', {templateUrl: 'partials/default.html', controller: 'MarrowCtrl'});
+      when('/random', {templateUrl: 'partials/random.html', controller: 'RandomMarrowCtrl'}).
+      when('/settings', {templateUrl: 'partials/user-settings.html', controller: 'UserSettingCtrl'}).
+      when('/subscriptions', {templateUrl: 'partials/subscription.html', controller: 'SubscriptionCtrl'}).
+      when('/', {templateUrl: 'partials/default.html', controller: 'MarrowCtrl'}).
+      when('/user/:user', {template: '<div ng-include="templateUrl">Loading...</div>', controller: 'UserCtrl'});
   }
 ]);
 
@@ -96,6 +111,34 @@ marrowApp.controller('LoginCtrl', function ($scope,$http,$route,$location) {
         else {$scope.message = login_succeeded.message;}
     });
   };
+});
+
+marrowApp.controller('RootCtrl', function ($scope,$http,$location,$route) {
+  $scope.url = "";
+  $scope.title = "";
+  $scope.sectionTitle = "";
+
+  $scope.update = function() {
+    return $http.get(getendpoint).success(function(data) {
+      $scope.sectionTitle = data.sectionTitle;
+      $scope.bone = data.marrow;
+    });
+  };
+
+  check_login().success(
+    function(is_loggedon) {
+      is_loggedon = JSON.parse(is_loggedon);
+      if (!is_loggedon) { $location.url('/login');}
+  }).finally(function (){
+
+    $scope.update().success(function(data) {
+      $scope.sectionTitle = data.sectionTitle;
+      $scope.bone = data.marrow;
+      if (afterGet !== undefined) {afterGet($scope,$http,$route);}
+    });
+
+    if (cb !== undefined) {cb($scope,$http,$route);}
+  });
 });
 
 function controllerFactory(name, getendpoint, cb, afterGet) {
@@ -147,6 +190,21 @@ function subscribe($http,$scope) {
     $scope.subscribeClass='is-hidden';
   };
 }
+
+marrowApp.controller('UserSettingCtrl', function ($scope,$http,$location) {
+  $scope.oldPassword = '';
+  $scope.newPassword = '';
+  $scope.changePassword = function() {
+    var postObj = {"old_password": $scope.oldPassword, "new_password": $scope.newPassword};
+    $http.post('/api/user/change-password', postObj).success(function(result) {
+      if (result.status === true) {
+        $location.url('/');
+      } else {
+        $scope.message = result.message;
+      }
+    });
+  };
+});
 
 marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams) {
   check_login();
