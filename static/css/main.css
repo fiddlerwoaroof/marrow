@@ -271,6 +271,22 @@ body.is-logged-on #nav-main {
 
 }
 
+/* @group Miscellaneous */
+
+a.user-settings {
+  color: rgb(0,0,128);
+  display: inline-block;
+  vertical-align: middle;
+  text-decoration: none;
+  font-size: 20px;
+}
+
+a.user-settings:hover {
+  color: rgb(0,0,256);
+}
+
+/* @end */
+
 /* Generic Small Devices */
 @media (max-width: 443px) {
 
