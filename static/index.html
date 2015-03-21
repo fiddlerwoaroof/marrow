@@ -34,7 +34,9 @@
 </head>
 <body>
   <div id="page-container">
-    <main ng-view></main>
+    <main ng-view>
+      <div id="footer-spacer"></div>
+    </main>
     <header>
       <h1 class="site-logo">Marrow</h1>
     </header>
@@ -46,7 +48,6 @@
         <li class="logout-link"><a href ng-click="logout()">Log Out</a></li>
       </ul>
     </nav>
-    <div id="footer-spacer"></div>
     <footer>
       <span class="beta-message">
         This service is currently in beta. Let us know of any problems on
