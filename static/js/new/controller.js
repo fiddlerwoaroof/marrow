@@ -285,8 +285,6 @@ controllerFactory('RandomMarrowCtrl', '/api/bones/random',
     $scope.subscribe = subscribe($http, $scope);
     $scope.unsubscribe = unsubscribe($http, $scope);
 
-    $scope.subscribed = false;
-    $scope.subscribeLabel = 'Subscribe';
     $scope.toggleSubscribe = toggleSubscribe($http, $scope);
 
   },
