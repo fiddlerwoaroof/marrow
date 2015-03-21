@@ -55,7 +55,7 @@ $$ LANGUAGE plpgsql;
 
 DROP FUNCTION IF EXISTS get_bone(text);
 CREATE OR REPLACE FUNCTION get_bone(username text)
-  RETURNS TABLE(name text, url text, title text, posted timestamp, linkid int, poster text) AS $$
+  RETURNS TABLE(name text, url text, title text, posted timestamp, linkid int) AS $$
 BEGIN
   RETURN QUERY SELECT users.name, links.url, links.title, links.posted, links.id
       FROM users
