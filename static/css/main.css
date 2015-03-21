@@ -95,6 +95,10 @@ header .site-logo {
 
 /* @group Footer */
 
+#footer-spacer {
+  height: 2.3em;
+}
+
 footer {
   position: fixed;
   height: 2.3em;
