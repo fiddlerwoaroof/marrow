@@ -2,7 +2,7 @@
   <h2 class="section-title">
     <button type="submit" ng-class="['sub-ctrl']"   ng-click="toggleSubscribe()">{{subscribeLabel}}</button>
     <a class="user-link" ng-href="{{path('UserCtrl', {'user': sectionTitle})}}">{{path('UserCtrl', {'user': sectionTitle})}}</a>
-    <a class="avatar-image" href="{{ path('UserCtrl', {'user': marrow.poster}) }}" title="{{marrow.poster}}">
+    <a class="avatar-image" href="{{ path('UserCtrl', {'user': sectionTitle}) }}" title="{{sectionTitle}}">
       <img ng-src="{{gravURL(sectionTitle)}}" />
     </a>
   </h2>
