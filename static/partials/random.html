@@ -2,6 +2,9 @@
   <h2 class="section-title">
     <button type="submit" ng-class="['sub-ctrl']"   ng-click="toggleSubscribe()">{{subscribeLabel}}</button>
     <a class="user-link" ng-href="{{path('UserCtrl', {'user': sectionTitle})}}">{{path('UserCtrl', {'user': sectionTitle})}}</a>
+    <a class="avatar-image" href="{{ path('UserCtrl', {'user': marrow.poster}) }}" title="{{marrow.poster}}">
+      <img ng-src="{{gravURL(sectionTitle)}}" />
+    </a>
   </h2>
   <ul class="bone-list">
     <li ng-repeat="marrow in bone" class="bone-item" data-id="{{marrow.id}}" data-url="{{marrow.url}}" data-posted="{{marrow.posted}}" data-title="{{marrow.title}}">

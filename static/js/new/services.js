@@ -20,4 +20,3 @@ serviceModule.factory('SubscribedTo', ['$resource',
   function subscriberFactory($resource) {
     return $resource('/api/user/following', {}, {});
   }]);
-

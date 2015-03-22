@@ -52,6 +52,17 @@ img {
 
 /* @end */
 
+.avatar-image {
+  display: inline-block;
+  vertical-align: middle;
+}
+.avatar-image img {
+  border-radius: 12px;
+}
+.bone-details {
+  display: inline-block;
+  vertical-align: middle;
+}
 .sub-ctrl {
   display: inline-block;
   vertical-align: middle;
@@ -167,6 +178,7 @@ main form input[type="text"] {
   white-space: nowrap;
   text-overflow: ellipsis;
   padding-right: 1em;
+  margin-bottom: 12px;
 }
 /* @end */
 

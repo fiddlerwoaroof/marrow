@@ -2,6 +2,9 @@
   <h2 class="section-title">
     <a class="fa fa-cog user-settings" href="/settings"></a>
     <a class="user-link" ng-href="{{path('UserCtrl', {'user': sectionTitle})}}">{{path('UserCtrl', {'user': sectionTitle})}}</a>
+    <a class="avatar-image" href="{{ path('UserCtrl', {'user': marrow.poster}) }}" title="{{marrow.poster}}">
+      <img ng-src="{{gravURL(sectionTitle)}}" />
+    </a>
   </h2>
   <form>
     <input type="text" ng-model="url" placeholder="http:// . . ."/>

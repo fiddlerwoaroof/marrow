@@ -182,4 +182,19 @@ BEGIN
   DELETE FROM user_ak WHERE user_id=uid AND user_ak.ak=supplied_ak RETURNING user_ak.ak INTO result;
   RETURN result;
 END
-$$ LANGUAGE plpgsql
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS check_password(text,text);
+CREATE OR REPLACE FUNCTION check_password(username text, provided_pass text) RETURNS bool
+AS $$
+DECLARE
+  uid INT;
+  stored_hash TEXT;
+  hash TEXT;
+  result BOOL;
+BEGIN
+  SELECT id,password INTO uid,stored_hash FROM users WHERE users.name = username;
+  SELECT stored_hash = crypt(provided_pass, stored_hash) INTO result;
+  RETURN result;
+END
+$$ LANGUAGE plpgsql;

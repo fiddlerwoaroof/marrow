@@ -1,4 +1,4 @@
-var marrowApp = angular.module('marrowApp', ['ngRoute', 'marrowApp.services']);
+var marrowApp = angular.module('marrowApp', ['ngRoute', 'marrowApp.services', 'marrowApp.directives']);
 
 var compareTo = function() { return {
   require: "ngModel",
@@ -150,8 +150,14 @@ function controllerFactory(name, getendpoint, cb, afterGet) {
     $scope.sectionTitle = "";
     $scope.friends = SubscribedTo.get();
 
+    $scope.gravURL = function(uid) {
+      var hash = CryptoJS.MD5(uid);
+      return '//gravatar.com/avatar/'+hash+'?d=identicon&s=24';
+    };
     $scope.update = function() {
-      return $http.get(getendpoint).success(function(data) {
+      var config = {params: $scope.args? $scope.args: {}};
+      q = config;
+      return $http.get(getendpoint, config).success(function(data) {
         $scope.sectionTitle = data.sectionTitle;
         $scope.bone = data.marrow;
       });
@@ -184,7 +190,7 @@ function toggleSubscribe($http,$scope) {
     } else {
       promise = $http.post('/api/bones/subscribe', postObj);
     }
-    
+
     return promise.success(function(result) {
         console.log('bing!');
         result = JSON.parse(result);
@@ -289,14 +295,19 @@ controllerFactory('RandomMarrowCtrl', '/api/bones/random',
 
   },
   function ($scope,$http) {
+    $scope.args = {last: $scope.sectionTitle};
     $http.get('/api/user/follows/'+$scope.sectionTitle).success(function(result) {
       $scope.subscribed = result.follows;
       $scope.subscribeLabel = $scope.subscribed ? 'unSubscribe': 'Subscribe';
   });
 });
 
-controllerFactory('SubscriptionCtrl', '/api/bones/subscriptions', 
+controllerFactory('SubscriptionCtrl', '/api/bones/subscriptions',
   function($scope, $http, Bones, SubscribedTo){
+    $scope.gravURL = function(uid) {
+      var hash = CryptoJS.MD5(uid);
+      return '//gravatar.com/avatar/'+hash+'?d=identicon&s=24';
+    };
     $scope.emptyOrEquals = function(actual, expected) {
       if (!expected) { return true;}
       else {return actual === expected;}

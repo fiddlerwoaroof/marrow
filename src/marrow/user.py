@@ -83,7 +83,7 @@ def adduser():
             username = username.strip().lower()
             password = password.strip()
             try:
-                cur.execute('INSERT INTO users (name,password,email) VALUES (%s,%s,%s)',
+                cur.execute("INSERT INTO users (name,password,email) VALUES (%s,crypt(%s, gen_salt('bf', 11)),%s)",
                             (username, password, 'abc@def.com'))
                 session['username'] = username
                 result['status'] = True
@@ -147,19 +147,23 @@ def login():
     username = username.strip().lower()
     password = password.strip()
     user = users.get(username, {})
-    rightPassword = user.get('password',None)
-    if password == rightPassword:
-        if 'ak' in request.args and request.args['ak']:
-            ak = base64.b64encode(os.urandom(24))
-            with database.get_db() as db:
-                with db.cursor() as cur:
-                    cur.callproc('put_ak', (username, ak))
-            result = {'success': True, 'ak': ak}
-        else:
-            session['username'] = username
-            result['status'] = True
-    else:
-        result['message'] = 'Wrong Username or Password'
+    rightPassword = user.get('password',object())
+    with database.get_db() as db:
+        with db.cursor() as cur:
+            cur.callproc('check_password', (username, password))
+            success = cur.fetchone()[0]
+            if success:
+                if 'ak' in request.args and request.args['ak']:
+                    ak = base64.b64encode(os.urandom(24))
+                    with database.get_db() as db:
+                        with db.cursor() as cur:
+                            cur.callproc('put_ak', (username, ak))
+                    result = {'success': True, 'ak': ak}
+                else:
+                    session['username'] = username
+                    result['status'] = True
+            else:
+                result['message'] = 'Wrong Username or Password'
     return json.dumps(result)
 
 @user_blueprint.route('/logout')
