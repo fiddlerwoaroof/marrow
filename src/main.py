@@ -25,6 +25,7 @@ limiter = Limiter(app)
 limiter.limit("60/hour 3/second", key_func=lambda: request.host)(user.user_blueprint)
 limiter.exempt(user.checkuser)
 limiter.exempt(user.following)
+limiter.exempt(user.follows)
 
 # Blueprints #
 user.get_users(app)
