@@ -6,8 +6,19 @@ import lxml.html
 from . import database
 import urlparse
 import json
+from marrow_config import config
 
 bone_blueprint = Blueprint('bone', __name__)
+
+useragent = [
+  ('User-agent',
+   'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36')]
+
+for handler in [urllib2.HTTPSHandler,urllib2.HTTPHandler]:
+    handler = handler()
+    opener = urllib2.build_opener(handler)
+    opener.addheaders = useragent
+    urllib2.install_opener(opener)
 
 @bone_blueprint.route('/link/<linkid>', methods=['GET','DELETE'])
 def delete_link(linkid):
@@ -33,20 +44,8 @@ def clean_url(url):
         netloc, path = path, netloc
     return urlparse.urlunparse((scheme, netloc, path, params, query, fragment))
 
-handler=urllib2.HTTPSHandler()
-opener = urllib2.build_opener(handler)
-opener.addheaders = [('User-agent', 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36')]
-urllib2.install_opener(opener)
-
-handler=urllib2.HTTPHandler()
-opener = urllib2.build_opener(handler)
-opener.addheaders = [('User-agent', 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36')]
-urllib2.install_opener(opener)
-
 def get_title(url):
-    data = urllib2.urlopen(url)
-    etree = lxml.html.parse(data)
-    return etree.xpath('//title')[0].text
+    return config.titlegetter.get_title(url)
 
 @bone_blueprint.route('/add', methods=['POST'])
 @bone_blueprint.route('/submit', methods=['POST'])
