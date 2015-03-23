@@ -4,3 +4,5 @@ Flask-Limiter==0.7.6
 psycopg2==2.6
 psycopg2==2.6
 uWSGI==2.0.9
+textblob-aptagger==0.3.0.dev0
+textblob==0.9.0
