@@ -1,5 +1,5 @@
-import os
-import base64
+from src.marrow.titlegetter import titlegetter
+from src.marrow.titlegetter import nytimes
 
 class config:
     debug = True
@@ -8,4 +8,5 @@ class config:
     user = "<theDatabaseUser>"
     password = "<theDatabasePassword>"
     host = "localhost"
+    titlegetter = titlegetter.TitleGetter()
 
