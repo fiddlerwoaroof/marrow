@@ -128,17 +128,21 @@ def subscribe():
             result = True
     return json.dumps(result);
 
-@bone_blueprint.route('/subscriptions')
-def subscriptions():
+@bone_blueprint.route('/subscriptions', defaults={'before':None})
+@bone_blueprint.route('/subscriptions/<before>')
+def subscriptions(before):
     username = None
     result = {'marrow':[], 'sectionTitle': 'Subscriptions'}
     if 'username' in session:
         username = session['username']
         with database.get_db().cursor() as cur:
-            cur.execute("SELECT poster, url, title, posted from get_bones(%s);", (username,))
+            args = (username,50) # only 50 results
+            if before is not None:
+                args = args + (before,)
+            cur.callproc("get_bones", args)
             result['marrow'] = [
                     dict(poster=poster, url=url,title=title,posted=posted.isoformat())
-                        for poster,url,title,posted
+                        for url,title,posted,poster
                         in cur.fetchall()
             ]
     return json.dumps(result)

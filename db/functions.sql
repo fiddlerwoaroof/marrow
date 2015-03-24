@@ -31,7 +31,8 @@ END
 $$ LANGUAGE plpgsql;
 
 DROP FUNCTION IF EXISTS get_bones(text, timestamp, int);
-CREATE OR REPLACE FUNCTION get_bones(username text, before timestamp, lim int)
+DROP FUNCTION IF EXISTS get_bones(text, int, timestamp);
+CREATE OR REPLACE FUNCTION get_bones(username text, lim int, before timestamp)
   RETURNS TABLE(url text, title text, posted timestamp, poster text) AS $$
 DECLARE
   subscriber_id int;
@@ -51,6 +52,29 @@ BEGIN
         WHERE fro_id = subscriber_id
               AND
               links.posted < before ;
+  RETURN QUERY SELECT * FROM middle ORDER BY middle.posted DESC LIMIT lim;
+END
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS get_bones(text, int);
+CREATE OR REPLACE FUNCTION get_bones(username text, lim int)
+  RETURNS TABLE(url text, title text, posted timestamp, poster text) AS $$
+DECLARE
+  subscriber_id int;
+BEGIN
+  SELECT INTO subscriber_id id FROM users WHERE users.name = username;
+  CREATE TEMP TABLE middle
+    ON COMMIT DROP
+    AS
+      SELECT
+        DISTINCT ON (links.url)
+        links.url,links.title,links.posted,users1.name
+        FROM user_subscriptions
+        RIGHT JOIN user_links ON user_subscriptions.to_id=user_links.user_id
+        INNER JOIN links ON link_id=links.id
+        INNER JOIN users ON users.id=fro_id
+        LEFT JOIN users as users1 ON users1.id=to_id
+        WHERE fro_id = subscriber_id;
   RETURN QUERY SELECT * FROM middle ORDER BY middle.posted DESC LIMIT lim;
 END
 $$ LANGUAGE plpgsql;
