@@ -36,5 +36,5 @@ class TitleGetter(object):
         try:
             return handler.get_title(url)
         except urllib2.HTTPError:
-            return url
+            return self.default_handler.get_title(url)
 
