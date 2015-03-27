@@ -1,17 +1,19 @@
 <section id="main">
   <h2 class="section-title">
-    <button type="submit" ng-class="['sub-ctrl']"   ng-click="toggleSubscribe()">{{subscribeLabel}}</button>
-    <a class="user-link" ng-href="{{path('UserCtrl', {'user': sectionTitle})}}">{{path('UserCtrl', {'user': sectionTitle})}}</a>
-    <a class="avatar-image" href="{{ path('UserCtrl', {'user': sectionTitle}) }}" title="{{sectionTitle}}">
+    <button type="submit"
+            ng-class="['sub-ctrl']"
+            ng-click="toggleSubscribe()">{{subscribeLabel}}</button>
+    <a class="user-link"
+       ng-href="{{path('UserCtrl', {'user': sectionTitle})}}">
+      {{path('UserCtrl', {'user': sectionTitle})}}
+    </a>
+    <a class="avatar-image"
+       href="{{ path('UserCtrl', {'user': sectionTitle}) }}"
+       title="{{sectionTitle}}">
       <img ng-src="{{gravURL(sectionTitle)}}" />
     </a>
   </h2>
-  <ul class="bone-list">
-    <li ng-repeat="marrow in bone" class="bone-item" data-id="{{marrow.id}}" data-url="{{marrow.url}}" data-posted="{{marrow.posted}}" data-title="{{marrow.title}}">
-      <span ng-if="marrow.title"><a href="{{marrow.url}}" class="list-item" >{{marrow.title}}</a><br /></span>
-      <a href="{{marrow.url}}" class="{{marrow.title? 'de-emphasize' : ''}}" >{{marrow.url}}</a>
-    </li>
-  </ul>
+  <bone-list bone="bone" />
 </section>
 
 

@@ -1,16 +1,17 @@
-angular.module('marrowApp.directives', [])
+angular.module('marrowApp.directives', ['marrowApp.utils'])
 
-.directive('gravatarImg', function() {
+.directive('userBadge', function() {
   return {
-    template: function (elem, attr) {
-      console.log(attr.username);
-      var hash = CryptoJS.MD5(attr.username);
-      console.log(attr);
-      var userPage = '/user/'+attr.username;
-      var url = '//gravatar.com/avatar/'+hash+'?d=identicon&s=48';
-      return '<a href="'+userPage+'"><img src="'+url+'" /></a>';
+    scope: {
+      poster: '@',
+    },
+    templateUrl: '/js/new/userBadge.html',
+    controller: function($scope) {
+      $scope.gravURL = function(uid) {
+        var hash = CryptoJS.MD5(uid);
+        return '//gravatar.com/avatar/'+hash+'?d=identicon&s=24';
+      };
     }
   };
 });
-
 

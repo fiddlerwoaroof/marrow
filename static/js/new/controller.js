@@ -1,4 +1,6 @@
-var marrowApp = angular.module('marrowApp', ['ngRoute', 'marrowApp.services', 'marrowApp.directives']);
+var marrowApp = angular.module('marrowApp',
+                               ['ngRoute', 'marrowApp.services', 'marrowApp.directives', 'marrowApp.utils',
+                                'marrowApp.directives.boneList']);
 
 var compareTo = function() { return {
   require: "ngModel",
@@ -39,25 +41,25 @@ function check_login() {
 }
 
 // from http://stackoverflow.com/questions/15324039/how-to-create-a-url-for-link-helper-in-angularjjs
-marrowApp.run(function($route, $rootScope) {
-  $rootScope.path = function(controller, params) {
-    // Iterate over all available routes
-    var baseUrl = document.getElementsByTagName('base')[0].href.replace(/\/$/, '');
-    for(var path in $route.routes) {
-      var pathController = $route.routes[path].controller;
-      if(pathController == controller) { // Route found
-        var result = path;
-        // Construct the path with given parameters in it
-        for(var param in params) {
-          result = result.replace(':' + param, params[param]);
-        }
-        return baseUrl + result;
-      }
-    }
-    // No such controller in route definitions
-    return undefined;
-  };
-});
+//marrowApp.run(function($route, $rootScope) {
+//  $rootScope.path = function(controller, params) {
+//    // Iterate over all available routes
+//    var baseUrl = document.getElementsByTagName('base')[0].href.replace(/\/$/, '');
+//    for(var path in $route.routes) {
+//      var pathController = $route.routes[path].controller;
+//      if(pathController == controller) { // Route found
+//        var result = path;
+//        // Construct the path with given parameters in it
+//        for(var param in params) {
+//          result = result.replace(':' + param, params[param]);
+//        }
+//        return baseUrl + result;
+//      }
+//    }
+//    // No such controller in route definitions
+//    return undefined;
+//  };
+//});
 
 
 marrowApp.config(['$routeProvider',
@@ -244,6 +246,11 @@ marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams) {
   $scope.toggleSubscribe = toggleSubscribe($http, $scope);
 
   $scope.delete = deleteLink($scope);
+
+  $scope.gravURL = function(uid) {
+    var hash = CryptoJS.MD5(uid);
+    return '//gravatar.com/avatar/'+hash+'?d=identicon&s=24';
+  };
 
   $scope.addLink = function(url) {
     var postObj = {"url":url, "title":$scope.title};
