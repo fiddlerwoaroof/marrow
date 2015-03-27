@@ -52,13 +52,34 @@ img {
 
 /* @end */
 
+.avatar-image:hover {
+  background: #eee;
+  text-decoration: none;
+  color: white;
+  background: linear-gradient(to bottom, #eee 0%, #bbb 75%, #888 100%);
+}
+
+.avatar-image:hover .de-emphasize {
+  color: white;
+}
+
 .avatar-image {
+  padding: 5px 10px;
+  border-radius: 10px;
   display: inline-block;
   vertical-align: middle;
+  text-decoration: none;
 }
 .avatar-image img {
   border-radius: 12px;
+  vertical-align: middle;
 }
+
+.poster-handle {
+  display: inline-block;
+  vertical-align: middle;
+}
+
 .bone-details {
   display: inline-block;
   vertical-align: middle;
@@ -235,7 +256,7 @@ div.marrow {
   display: inline-block;
   vertical-align: top;
 }
-a.de-emphasize {
+.de-emphasize, a.de-emphasize {
   font-size: 80%;
   color: #aaa;
 }

@@ -17,7 +17,8 @@
         <a href="{{marrow.url}}" ng-class="{'de-emphasize':marrow.title}" >{{marrow.url}}</a>
       </div>
       <a class="avatar-image" href="{{ path('UserCtrl', {'user': marrow.poster}) }}" title="{{marrow.poster}}">
-        <img ng-src="{{gravURL(marrow.poster)}}" />
+        <img class="poster-avatar" ng-src="{{gravURL(marrow.poster)}}" />
+        <span class="poster-handle de-emphasize">{{marrow.poster}}</span>
       </a>
     </li>
   </ul>
