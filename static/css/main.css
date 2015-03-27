@@ -281,12 +281,11 @@ a.delete-link:hover {
   visibility: hidden;
 }
 
-body.is-logged-on #nav-main {
-  visibility: visible;
-}
-
 /* Generic Large Devices */
 @media (min-width: 443px) {
+  body.is-logged-on #nav-main {
+    visibility: visible;
+  }
 
   #nav-main {
     position: absolute;
@@ -345,8 +344,10 @@ a.user-settings:hover {
 @media (max-width: 443px) {
 
   header {
+    position: fixed;
     padding: 9px;
     height: 40px;
+    width: 100%;
   }
   
   header .site-logo {
@@ -368,7 +369,7 @@ a.user-settings:hover {
     padding: 10px;
     visibility: hidden;
   }
-  
+
   #nav-main:after {
     font-family: "FontAwesome";
     font-size: 20px;
@@ -384,6 +385,10 @@ a.user-settings:hover {
     left: 0;
     visibility: visible;
     box-sizing: border-box;
+  }
+  
+  #nav-main:hover:after {
+    background: #888;
   }
   #nav-main ul {
     position: fixed;
@@ -409,6 +414,14 @@ a.user-settings:hover {
   }
   #nav-main a:hover, #nav-main a:active, #nav-main a:focus {
     background: #ddd;
+  }
+
+  .bone-list .avatar-image {
+    text-align: center;
+  }
+  
+  .bone-list .poster-handle {
+    display: none;
   }
   
   #nav-main .logout-link {
