@@ -195,11 +195,16 @@ main form input[type="text"] {
   width: 315px;
 }
 .bone-list li {
+  padding-right: 1em;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.bone-list .bone-details {
+  width: 80%;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  padding-right: 1em;
-  margin-bottom: 12px;
 }
 /* @end */
 
