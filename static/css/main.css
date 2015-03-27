@@ -69,6 +69,7 @@ img {
   display: inline-block;
   vertical-align: middle;
   text-decoration: none;
+  width: 15%;
 }
 .avatar-image img {
   border-radius: 12px;
