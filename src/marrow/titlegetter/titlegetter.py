@@ -1,3 +1,4 @@
+import urllib2
 import urlparse
 
 from .utils import memoize
@@ -32,4 +33,8 @@ class TitleGetter(object):
             if site in self.getters:
                 handler = self.getters[site]
                 break
-        return handler.get_title(url)
+        try:
+            return handler.get_title(url)
+        except urllib2.HTTPError:
+            return url
+
