@@ -16,7 +16,13 @@ class DefaultTitleGetter(object):
     def get_title(self, url):
         scheme, netloc, path, params, query, fragment = urlparse.urlparse(url, 'http')
         data = urllib2.urlopen(url)
-        etree = lxml.html.parse(data)
+        content_type = data.headers['content-type'].lower()
+        charset = 'utf-8'
+        if 'charset' in content_type:
+            charset = content_type.partition('charset=')[-1]
+        data = data.read()
+        data = data.decode(charset)
+        etree = lxml.html.fromstring(data)
         titleElems = etree.xpath('//title')
         title = url
         if titleElems != []:
