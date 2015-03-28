@@ -1,20 +1,32 @@
 <section id="main">
   <h2 class="section-title">
     <a class="fa fa-cog user-settings" href="/settings"></a>
-    <a class="user-link" ng-href="{{path('UserCtrl', {'user': sectionTitle})}}">{{path('UserCtrl', {'user': sectionTitle})}}</a>
-    <a class="avatar-image" href="{{ path('UserCtrl', {'user': sectionTitle}) }}" title="{{sectionTitle}}">
-      <img ng-src="{{gravURL(sectionTitle)}}" />
+    <a class="user-link" ng-href="{{path('UserCtrl', {'user': bone.sectionTitle})}}">
+      {{path('UserCtrl', {'user': bone.sectionTitle})}}
+    </a>
+    <a class="headline-avatar"
+       href="{{ path('UserCtrl', {'user': bone.sectionTitle}) }}"
+       title="{{bone.sectionTitle}}">
+      <gravatar-image user-name="bone.sectionTitle"></gravatar-image>
     </a>
   </h2>
   <form>
-    <input type="text" ng-model="url" placeholder="http:// . . ."/>
+    <input type="text" ng-model="$parent.url" placeholder="http:// . . ."/>
     <button type="submit" ng-click="addLink(url)">+</button>
   </form>
   <ul class="bone-list">
-    <li ng-repeat="marrow in bone" class="bone-item" data-id="{{marrow.id}}" data-url="{{marrow.url}}" data-posted="{{marrow.posted}}" data-title="{{marrow.title}}">
+    <li ng-repeat="marrow in bone.marrow"
+        class="bone-item"
+        data-id="{{marrow.id}}"
+        data-url="{{marrow.url}}"
+        data-posted="{{marrow.posted}}"
+        data-title="{{marrow.title}}">
       <a href class="delete-link" ng-click="delete(marrow.id)" title="Delete Link from List">(-)</a>
       <div class="marrow">
-        <span ng-if="marrow.title"><a href="{{marrow.url}}" class="list-item" >{{marrow.title}}</a><br /></span>
+        <span ng-if="marrow.title">
+          <a href="{{marrow.url}}" class="list-item" >{{marrow.title}}</a>
+          <br />
+        </span>
         <a href="{{marrow.url}}" class="{{marrow.title? 'de-emphasize' : ''}}" >{{marrow.url}}</a>
       </div>
     </li>

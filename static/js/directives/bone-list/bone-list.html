@@ -1,9 +1,14 @@
 <ul class="bone-list">
-  <li ng-repeat="marrow in bone" class="bone-item" data-id="{{marrow.id}}"
-      data-url="{{marrow.url}}" data-posted="{{marrow.posted}}" data-title="{{marrow.title}}"
+  <li ng-repeat="marrow in bone"
+      class="bone-item"
+      data-id="{{marrow.id}}"
+      data-url="{{marrow.url}}"
+      data-posted="{{marrow.posted}}"
+      data-title="{{marrow.title}}"
       data-poster="{{marrow.poster}}">
     <span ng-if="marrow.title">
-      <a href="{{marrow.url}}" class="list-item" >{{marrow.title}}</a><br />
+      <a href="{{marrow.url}}" class="list-item" >{{marrow.title}}</a>
+      <br />
     </span>
     <a href="{{marrow.url}}" ng-class="{'de-emphasize': marrow.title}" >{{marrow.url}}</a>
   </li>

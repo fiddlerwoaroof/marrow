@@ -109,6 +109,7 @@ def following():
                 result['data'] = [x[0] for x in cur.fetchall()]
 
     return json.dumps(result)
+
 @user_blueprint.route('/check')
 def checkuser(): return json.dumps('username' in session)
 

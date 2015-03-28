@@ -40,28 +40,6 @@ function check_login() {
   });
 }
 
-// from http://stackoverflow.com/questions/15324039/how-to-create-a-url-for-link-helper-in-angularjjs
-//marrowApp.run(function($route, $rootScope) {
-//  $rootScope.path = function(controller, params) {
-//    // Iterate over all available routes
-//    var baseUrl = document.getElementsByTagName('base')[0].href.replace(/\/$/, '');
-//    for(var path in $route.routes) {
-//      var pathController = $route.routes[path].controller;
-//      if(pathController == controller) { // Route found
-//        var result = path;
-//        // Construct the path with given parameters in it
-//        for(var param in params) {
-//          result = result.replace(':' + param, params[param]);
-//        }
-//        return baseUrl + result;
-//      }
-//    }
-//    // No such controller in route definitions
-//    return undefined;
-//  };
-//});
-
-
 marrowApp.config(['$routeProvider',
   function($routeProvider) {
     $routeProvider.
@@ -145,8 +123,9 @@ marrowApp.controller('RootCtrl', function ($scope,$http,$location,$route) {
 
 
 function controllerFactory(name, getendpoint, cb, afterGet) {
-  marrowApp.controller(name, function ($scope,$http,$location,$route, SubscribedTo) {
-    q = $scope;
+  us = null;
+  marrowApp.controller(name, function ($scope,$http,$location,$route, SubscribedTo, UserService) {
+    us=UserService;
     $scope.url = "";
     $scope.title = "";
     $scope.sectionTitle = "";
@@ -160,8 +139,7 @@ function controllerFactory(name, getendpoint, cb, afterGet) {
       var config = {params: $scope.args? $scope.args: {}};
       q = config;
       return $http.get(getendpoint, config).success(function(data) {
-        $scope.sectionTitle = data.sectionTitle;
-        $scope.bone = data.marrow;
+        $scope.bone = data;
       });
     };
 
@@ -172,8 +150,7 @@ function controllerFactory(name, getendpoint, cb, afterGet) {
     }).finally(function (){
 
       $scope.update().success(function(data) {
-        $scope.sectionTitle = data.sectionTitle;
-        $scope.bone = data.marrow;
+        $scope.bone = data;
         if (afterGet !== undefined) {afterGet($scope,$http,$route, null, SubscribedTo);}
       });
 
@@ -183,7 +160,8 @@ function controllerFactory(name, getendpoint, cb, afterGet) {
 }
 
 function toggleSubscribe($http,$scope) {
-  return function () {
+  return function (txt) {
+    console.log(txt);
     var postObj = {"from":$scope.sectionTitle, "to":$scope.sectionTitle};
     var promise = null;
 
@@ -239,71 +217,47 @@ marrowApp.controller('UserSettingCtrl', function ($scope,$http,$location) {
   };
 });
 
-marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams) {
+marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams, UserService, BoneService) {
   check_login();
   $scope.url = "";
   $scope.title = "";
   $scope.toggleSubscribe = toggleSubscribe($http, $scope);
-
   $scope.delete = deleteLink($scope);
 
-  $scope.gravURL = function(uid) {
-    var hash = CryptoJS.MD5(uid);
-    return '//gravatar.com/avatar/'+hash+'?d=identicon&s=24';
-  };
+  var user = $routeParams.user;
+  $scope.bone = BoneService.user({user: user});
 
   $scope.addLink = function(url) {
     var postObj = {"url":url, "title":$scope.title};
-    $http.post('/api/bones/add', postObj).success(function(data) {
+    BoneService.add(postObj, function(data) {
       if (data.success) {
-        //postObj.id = data.id;
         $scope.update();
         $scope.url = "";
       }
     });
   };
 
-  q = $scope;
-
-
-  var getendpoint = '/api/bones/u/'+$routeParams.user;
-  $scope.update = function() {
-    console.log('updating');
-    return $http.get(getendpoint).success(function(data) {
-      $scope.sectionTitle = data.sectionTitle;
-      $scope.bone = data.marrow;
-    });
-  };
-
-  var user = $routeParams.user;
-  $http.get('/api/user/follows/'+user).success(function(result) {
-      if (result.me === user) {
-        $scope.templateUrl = "/partials/default.html";
-      } else {
-        $scope.templateUrl = "/partials/random.html";
-        $scope.subscribed = result.follows;
-        $scope.subscribeLabel = $scope.subscribed ? 'unSubscribe': 'Subscribe';
-      }
-  }).success(function (){
-    $http.get(getendpoint).success(function(data) {
-      $scope.sectionTitle = data.sectionTitle;
-      $scope.bone = data.marrow;
-    });
+  $scope.follows = UserService.follows({'user': user}, function(result) {
+    $scope.templateUrl = result.me === user? "/partials/default.html": "/partials/random.html";
+    if (result.me !== user) {
+      $scope.subscribed = result.follows;
+      $scope.subscribeLabel = $scope.subscribed ? 'unSubscribe': 'Subscribe';
+    }
   });
+
+  $scope.update = function() {
+    $scope.bone = BoneService.user({user: user});
+  };
 
 });
 
 controllerFactory('RandomMarrowCtrl', '/api/bones/random',
   function($scope,$http) {
-    $scope.subscribe = subscribe($http, $scope);
-    $scope.unsubscribe = unsubscribe($http, $scope);
-
     $scope.toggleSubscribe = toggleSubscribe($http, $scope);
-
   },
   function ($scope,$http) {
     $scope.args = {last: $scope.sectionTitle};
-    $http.get('/api/user/follows/'+$scope.sectionTitle).success(function(result) {
+    $http.get('/api/user/follows/'+$scope.bone.sectionTitle).success(function(result) {
       $scope.subscribed = result.follows;
       $scope.subscribeLabel = $scope.subscribed ? 'unSubscribe': 'Subscribe';
   });

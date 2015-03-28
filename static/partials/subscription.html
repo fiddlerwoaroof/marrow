@@ -1,5 +1,5 @@
 <section id="main">
-  <h2 class="section-title">{{sectionTitle}}</h2>
+  <h2 class="section-title">{{bone.sectionTitle}}</h2>
   <form>
     <ul class="subscription-list">
       <li>
@@ -11,9 +11,18 @@
     </ul>
   </form>
   <ul class="bone-list">
-    <li ng-repeat="marrow in bone | filter:{poster:friend}:emptyOrEquals" class="bone-item" data-id="{{marrow.id}}" data-url="{{marrow.url}}" data-posted="{{marrow.posted}}" data-title="{{marrow.title}}" data-poster="{{marrow.poster}}">
+    <li ng-repeat="marrow in bone.marrow | filter:{poster:friend}:emptyOrEquals"
+        class="bone-item"
+        data-id="{{marrow.id}}"
+        data-url="{{marrow.url}}"
+        data-posted="{{marrow.posted}}"
+        data-title="{{marrow.title}}"
+        data-poster="{{marrow.poster}}">
       <div class="bone-details">
-        <span ng-if="marrow.title"><a href="{{marrow.url}}" class="list-item" >{{marrow.title}}</a><br /></span>
+        <span ng-if="marrow.title">
+          <a href="{{marrow.url}}" class="list-item" >{{marrow.title}}</a>
+          <br />
+        </span>
         <a href="{{marrow.url}}" ng-class="{'de-emphasize':marrow.title}" >{{marrow.url}}</a>
       </div>
       <user-badge poster="{{marrow.poster}}"></user-badge>

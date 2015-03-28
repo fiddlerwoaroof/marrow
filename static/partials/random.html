@@ -2,18 +2,18 @@
   <h2 class="section-title">
     <button type="submit"
             ng-class="['sub-ctrl']"
-            ng-click="toggleSubscribe()">{{subscribeLabel}}</button>
+            ng-click="toggleSubscribe('boo')">{{subscribeLabel}}</button>
     <a class="user-link"
-       ng-href="{{path('UserCtrl', {'user': sectionTitle})}}">
-      {{path('UserCtrl', {'user': sectionTitle})}}
+       ng-href="{{path('UserCtrl', {'user': bone.sectionTitle})}}">
+      {{path('UserCtrl', {'user': bone.sectionTitle})}}
     </a>
-    <a class="avatar-image"
-       href="{{ path('UserCtrl', {'user': sectionTitle}) }}"
-       title="{{sectionTitle}}">
-      <img ng-src="{{gravURL(sectionTitle)}}" />
+    <a class="my-avatar"
+       href="{{ path('UserCtrl', {'user': bone.sectionTitle}) }}"
+       title="{{bone.sectionTitle}}">
+      <gravatar-image class="my-image" user-name="{{bone.sectionTitle}}"></gravatar-image>
     </a>
   </h2>
-  <bone-list bone="bone" />
+  <bone-list bone="bone.marrow" />
 </section>
 
 
