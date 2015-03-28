@@ -33,8 +33,12 @@ class TitleGetter(object):
             if site in self.getters:
                 handler = self.getters[site]
                 break
+
+        title = None
         try:
-            return handler.get_title(url)
+            title = handler.get_title(url)
         except urllib2.HTTPError:
-            return self.default_handler.get_title(url)
+            title = self.default_handler.get_title(url)
+
+        return title.encode('utf-8')
 
