@@ -172,20 +172,16 @@ controllerFactory('RandomMarrowCtrl', '/api/bones/random',
     $scope.iFollow = UserService.follows({user:$scope.bone.sectionTitle});
 });
 
-controllerFactory('SubscriptionCtrl', '/api/bones/subscriptions',
-  function($scope, $http, Bones, SubscribedTo){
-    $scope.emptyOrEquals = function(actual, expected) {
-      if (!expected) { return true;}
-      else {return actual === expected;}
-    };
-  });
+controllerFactory('SubscriptionCtrl', '/api/bones/subscriptions', function($scope, $http){
+  $scope.emptyOrEquals = function(actual, expected) {
+    if (!expected) { return true; }
+    else {return actual === expected; }
+  };
+});
 
 controllerFactory('MarrowCtrl', '/api/bones', function($scope,$http,$route) {
   $scope.delete = deleteLink($scope);
-  $scope.postobj = {
-    url: "",
-    title: ""
-  };
+  $scope.postobj = {url: "", title: ""};
   $scope.addLink = addLink($scope);
 });
 
@@ -208,26 +204,6 @@ function toggleSubscribe($http,$scope, UserService) {
           $scope.iFollow.follows = ! $scope.iFollow.follows;
         }
       });
-  };
-}
-
-function unsubscribe($http,$scope) {
-  return function () {
-    var postObj = {"from":$scope.bone.sectionTitle};
-    $http.post('/api/bones/unsubscribe', postObj);
-
-    $scope.unsubscribeClass='is-hidden';
-    $scope.subscribeClass='';
-  };
-}
-
-function subscribe($http,$scope) {
-  return function () {
-    var postObj = {"to":$scope.bone.sectionTitle};
-    $http.post('/api/bones/subscribe', postObj);
-
-    $scope.unsubscribeClass='';
-    $scope.subscribeClass='is-hidden';
   };
 }
 
@@ -269,11 +245,7 @@ marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams, UserServic
 
   var user = $routeParams.user;
   $scope.bone = BoneService.user({user: user});
-
-  $scope.postobj = {
-    url: "",
-    title: ""
-  };
+  $scope.postobj = {url: "", title: ""};
   $scope.addLink = addLink($scope);
 
   $scope.iFollow = UserService.follows({user:user},function(result) {
