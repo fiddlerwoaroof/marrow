@@ -10,7 +10,7 @@
     <a class="my-avatar"
        href="{{ path('UserCtrl', {'user': bone.sectionTitle}) }}"
        title="{{bone.sectionTitle}}">
-      <gravatar-image class="my-image" user-name="{{bone.sectionTitle}}"></gravatar-image>
+      <gravatar-image class="my-image" test="bone.sectionTitle" user-name="{{bone.sectionTitle}}"></gravatar-image>
     </a>
   </h2>
   <bone-list bone="bone.marrow" />

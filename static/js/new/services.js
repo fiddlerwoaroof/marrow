@@ -15,6 +15,7 @@ serviceModule.factory('BoneService', ['$resource',
       add: {'method': 'POST', 'url': '/api/bones/add'},
       user: {'method': 'GET', 'url': '/api/bones/u/:user', params: {user: '@user'}},
       random: {'method': 'GET', 'url': '/api/bones/random'},
+      subscriptions: {'method': 'GET', 'url': '/api/bones/subscriptions'},
     });
 }]);
 
@@ -25,9 +26,9 @@ serviceModule.factory('SubscribedTo', ['$resource',
 
 serviceModule.factory('UserService', ['$resource',
   function ($resource) {
-    console.log(123);
     return $resource('/user/check', {}, {
       add: {'method': 'POST', 'url': '/api/user/add'},
+      check: {'method': 'GET', 'url': '/api/user/check', responseType: 'json'},
       login: {'method': 'POST', 'url': '/api/user/login'},
       logout: {'method': 'POST', 'url': '/api/user/logout'},
       follows: {'method': 'GET', 'url': '/api/user/follows/:user', params: {user: '@user'}},

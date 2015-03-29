@@ -4,10 +4,12 @@ angular.module('marrowApp.directives', ['marrowApp.utils'])
   return {
     scope: { userName: '@', class: '@' },
     controller: function($scope) {
-      var hash = CryptoJS.MD5($scope.userName);
-      $scope.gravUrl = '//gravatar.com/avatar/'+hash+'?d=identicon&s=24';
+      $scope.gravUrl = function() {
+        var hash = CryptoJS.MD5($scope.userName);
+        return '//gravatar.com/avatar/'+hash+'?d=identicon&s=24';
+      };
     },
-    template: '<img class="{{class}}" src="{{gravUrl}}" title="{{userName}}" />'
+    template: '<img class="identicon {{class}}" src="{{gravUrl()}}" title="{{userName}}" />'
   };
 })
 

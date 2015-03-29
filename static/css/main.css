@@ -71,8 +71,9 @@ img {
   text-decoration: none;
   width: 15%;
 }
-.avatar-image img {
-  border-radius: 12px;
+
+.identicon {
+  border-radius: 50%;
   vertical-align: middle;
 }
 
