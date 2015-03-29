@@ -1,4 +1,4 @@
-angular.module('marrowApp.directives', ['marrowApp.utils'])
+angular.module('marrowApp.userBadge', ['marrowApp.utils'])
 
 .directive('gravatarImage', function() {
   return {

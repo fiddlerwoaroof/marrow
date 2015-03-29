@@ -1,43 +1,5 @@
-var marrowApp = angular.module('marrowApp',
-                               ['ngRoute', 'marrowApp.services', 'marrowApp.directives', 'marrowApp.utils',
-                                'marrowApp.directives.boneList']);
-
-var compareTo = function() { return {
-  require: "ngModel",
-  scope: { otherModelValue: "=compareTo" },
-  link: function(scope, element, attributes, ngModel) {
-    ngModel.$validators.compareTo = function(modelValue) {
-      return modelValue == scope.otherModelValue;
-    };
-    scope.$watch("otherModelValue", function() {
-      ngModel.$validate();
-    });
-  }
-};};
-
-marrowApp.directive("compareTo", compareTo);
-
-function deleteLink($scope) {
-  injector = angular.injector(['ng']);
-  $http = injector.get('$http');
-  return function (linkid) {
-    $http.delete('/api/bones/link/'+linkid).success(function (deleted) {
-      deleted = JSON.parse(deleted);
-      if (deleted === true) { $scope.update(); }
-    });
-  };
-}
-
-function check_login() {
-  injector = angular.injector(['ng']);
-  $http = injector.get('$http');
-  return $http.get("/api/user/check").success(function(is_loggedon) {
-    console.log(is_loggedon);
-    if (is_loggedon.result === true) {
-      angular.element(document.body).addClass('is-logged-on');
-    }
-  });
-}
+var marrowApp = angular.module('marrowApp', ['ngRoute', 'marrowApp.services', 'marrowApp.directives', 'marrowApp.utils',
+                                'marrowApp.directives.boneList', 'marrowApp.userBadge']);
 
 marrowApp.config(['$routeProvider',
   function($routeProvider) {
@@ -51,18 +13,24 @@ marrowApp.config(['$routeProvider',
   }
 ]);
 
-marrowApp.config(['$locationProvider',
-  function($locationProvider) {
-    $locationProvider.html5Mode(true);
-  }
-]);
+marrowApp.config(['$locationProvider', function($locationProvider) { $locationProvider.html5Mode(true); }]);
 
 marrowApp.controller('LoginCtrl', function ($scope,$http,$route,$location) {
   $scope.message = '';
 
+  var check_login = function () {
+    injector = angular.injector(['ng']);
+    $http = injector.get('$http');
+    return $http.get("/api/user/check").success(function(is_loggedon) {
+      console.log(is_loggedon);
+      if (is_loggedon.result === true) {
+        angular.element(document.body).addClass('is-logged-on');
+      }
+    });
+  };
+
   check_login().success(
     function(is_loggedon) {
-      is_loggedon = JSON.parse(is_loggedon);
       if (is_loggedon.result) { $location.url('/');}
   });
 
@@ -92,177 +60,11 @@ marrowApp.controller('LoginCtrl', function ($scope,$http,$route,$location) {
   };
 });
 
-marrowApp.controller('RootCtrl', function ($scope,$http,$location,$route) {
+marrowApp.controller('RootCtrl', function ($scope,$http,$location,$route, SubscribedTo, BoneService, UserService) {
   $scope.url = "";
   $scope.title = "";
-  $scope.bone.sectionTitle = "";
 
-  $scope.update = function() {
-    return $http.get(getendpoint).success(function(data) {
-      $scope.bone.sectionTitle = data.sectionTitle;
-      $scope.bone = data.marrow;
-    });
-  };
-
-  check_login().success(
-    function(is_loggedon) {
-      is_loggedon = JSON.parse(is_loggedon);
-      if (!is_loggedon.result) { $location.url('/login');}
-  }).finally(function (){
-
-    $scope.update().success(function(data) {
-      $scope.bone.sectionTitle = data.sectionTitle;
-      $scope.bone = data.marrow;
-      if (afterGet !== undefined) {afterGet($scope,$http,$route);}
-    });
-
-    if (cb !== undefined) {cb($scope,$http,$route);}
-  });
-});
-
-
-function controllerFactory(name, getendpoint, cb, afterGet) {
-  us = null;
-  marrowApp.controller(name, function ($scope,$http,$location,$route, SubscribedTo, UserService) {
-    us=UserService;
-    $scope.url = "";
-    $scope.title = "";
-    $scope.friends = {data: []};
-    $scope.bone = {sectionTitle: "", marrow: []};
-
-    $scope.update = function() {
-      var config = {params: $scope.args? $scope.args: {}};
-      q = config;
-      return $http.get(getendpoint, config).success(function(data) {
-        $scope.bone = data;
-      });
-    };
-
-    check_login().success(
-      function(is_loggedon) {
-        if (!is_loggedon.result) { $location.url('/login');}
-    }).finally(function (){
-
-      $scope.update().success(function(data) {
-        $scope.bone = data;
-
-        var following_set = Object.create(null);
-        $scope.bone.marrow.map(function(o) {
-          if (!(o.poster in following_set)) {
-            following_set[o.poster] = true;
-            $scope.friends.data.push(o.poster);
-          }
-        });
-
-        if (afterGet !== undefined) {afterGet($scope,$http,$route, null, SubscribedTo, UserService);}
-      });
-
-      if (cb !== undefined) {cb($scope,$http,$route, null, SubscribedTo, UserService);}
-    });
-  });
-}
-
-//BEGIN TEST
-marrowApp.controller('RandomMarrowCtrl', function ($scope,$http,$location,$route, SubscribedTo, BoneService, UserService) {
-  us=UserService;
-  $scope.url = "";
-  $scope.title = "";
-  $scope.friends = {data: []};
-  $scope.bone = {sectionTitle: "", marrow: []};
-  $scope.args = {last: ""};
-  $scope.toggleSubscribe = toggleSubscribe($http, $scope, UserService);
-
-  getendpoint = BoneService.random;
-  $scope.update = function() {
-    var config = {params: $scope.args? $scope.args: {}};
-    q = config;
-    getendpoint(function(data) {
-      $scope.bone.sectionTitle = data.sectionTitle;
-      $scope.bone.marrow = data.marrow;
-
-      $scope.args = {last: $scope.bone.sectionTitle};
-      $scope.iFollow = UserService.follows({user:$scope.bone.sectionTitle});
-    });
-
-    return $scope.bone.$promise;
-  };
-
-  UserService.check(function(is_loggedon) {
-    if (is_loggedon.result === true) {
-      angular.element(document.body).addClass('is-logged-on');
-    } else {
-      $location.url('/login');
-    }
-    $scope.update();
-  });
-});
-
-marrowApp.controller('SubscriptionCtrl', function ($scope,$http,$location,$route, SubscribedTo, BoneService, UserService) {
-  us=UserService;
-  $scope.url = "";
-  $scope.title = "";
-  $scope.friends = {data: []};
-  $scope.bone = {sectionTitle: "", marrow: []};
-  $scope.args = {last: ""};
-  $scope.toggleSubscribe = toggleSubscribe($http, $scope, UserService);
-
-  var getendpoint = BoneService.subscriptions;
-  $scope.update = function() {
-    var config = {params: $scope.args? $scope.args: {}};
-    q = config;
-    $scope.bone = getendpoint(function(data) {
-      $scope.args = {last: $scope.bone.sectionTitle};
-      $scope.iFollow = UserService.follows({user:$scope.bone.sectionTitle});
-    });
-
-    $scope.bone.$promise.then(function() {
-      var following_set = Object.create(null);
-      $scope.bone.marrow.map(function(o) {
-        if (!(o.poster in following_set)) {
-          following_set[o.poster] = true;
-          $scope.friends.data.push(o.poster);
-        }
-      });
-    });
-
-    return $scope.bone.$promise;
-
-  };
-
-  UserService.check(function(is_loggedon) {
-    if (is_loggedon.result === true) {
-      angular.element(document.body).addClass('is-logged-on');
-    } else {
-      $location.url('/login');
-    }
-    $scope.update();
-  });
-
-  $scope.emptyOrEquals = function(actual, expected) {
-    if (!expected) { return true; }
-    else {return actual === expected; }
-  };
-});
-
-//END TEST
-
-/*
- *controllerFactory('SubscriptionCtrl', '/api/bones/subscriptions', function($scope, $http){
- *  $scope.emptyOrEquals = function(actual, expected) {
- *    if (!expected) { return true; }
- *    else {return actual === expected; }
- *  };
- *});
- */
-
-controllerFactory('MarrowCtrl', '/api/bones', function($scope,$http,$route) {
-  $scope.delete = deleteLink($scope);
-  $scope.postobj = {url: "", title: ""};
-  $scope.addLink = addLink($scope);
-});
-
-function toggleSubscribe($http,$scope, UserService) {
-  return function (txt) {
+  $scope.toggleSubscribe = function (txt) {
     console.log($scope.bone.sectionTitle);
     var postObj = {"from":$scope.bone.sectionTitle, "to":$scope.bone.sectionTitle};
     var promise = null;
@@ -274,14 +76,106 @@ function toggleSubscribe($http,$scope, UserService) {
     }
 
     return promise.success(function(result) {
-        console.log('bing!');
-        result = JSON.parse(result);
-        if (result) {
-          $scope.iFollow.follows = ! $scope.iFollow.follows;
-        }
-      });
+      console.log('bing!');
+      result = JSON.parse(result);
+      if (result) {
+        $scope.iFollow.follows = ! $scope.iFollow.follows;
+      }
+    });
   };
-}
+
+  $scope.bone = {sectionTitle: "", marrow: []};
+  $scope.friends = {data: []};
+  $scope.args = {last: ""};
+
+  $scope.update = function() {
+    var config = {params: $scope.args? $scope.args: {}};
+    return $scope.getendpoint($scope.serviceParams, function(data) {
+      $scope.bone.sectionTitle = data.sectionTitle;
+      $scope.bone.marrow = data.marrow;
+      $scope.args = {last: $scope.bone.sectionTitle};
+      $scope.iFollow = UserService.follows({user:$scope.bone.sectionTitle});
+    }).$promise.then($scope._update);
+  };
+
+  UserService.check(function(is_loggedon) {
+    if (is_loggedon.result === true) {
+      angular.element(document.body).addClass('is-logged-on');
+    } else {
+      $location.url('/login');
+    }
+
+    $scope.update();
+  });
+
+});
+
+marrowApp.controller('RandomMarrowCtrl', function ($controller, $scope,$http,$location,$route, SubscribedTo, BoneService, UserService) {
+  $scope._update = function() {};
+  $scope.getendpoint = BoneService.random;
+  angular.extend(this, $controller('RootCtrl', {$scope: $scope}));
+});
+
+marrowApp.controller('SubscriptionCtrl', function ($controller,$scope,$http,$location,$route, SubscribedTo, BoneService, UserService) {
+  $scope.emptyOrEquals = function(actual, expected) {
+    if (!expected) { return true; }
+    else {return actual === expected; }
+  };
+
+  $scope._update = function() {
+    var following_set = Object.create(null);
+    $scope.bone.marrow.map(function(o) {
+      if (!(o.poster in following_set)) {
+        following_set[o.poster] = true;
+        $scope.friends.data.push(o.poster);
+      }
+    });
+  };
+
+  $scope.getendpoint = BoneService.subscriptions;
+  angular.extend(this, $controller('RootCtrl', {$scope: $scope}));
+});
+
+marrowApp.controller('MarrowCtrl', function ($controller,$scope,$http,$location,$route, SubscribedTo, BoneService, UserService) {
+  $scope.postobj = {url: "", title: ""};
+
+  $scope.delete = function (linkid) {
+    $http.delete('/api/bones/link/'+linkid).success(function (deleted) {
+      deleted = JSON.parse(deleted);
+      if (deleted === true) { $scope.update(); }
+    });
+  };
+
+  $scope.addLink = function() {
+    $http.post('/api/bones/add', $scope.postobj).success(function(data) {
+      if (data.success) {
+        $scope.postobj.url = "";
+        $scope.update();
+      }
+    });
+  };
+
+  if ($scope.getendpoint === undefined) {
+    console.log('getendpointunset');
+    $scope.getendpoint = BoneService.get;
+  }
+  angular.extend(this, $controller('RootCtrl', {$scope: $scope}));
+});
+
+marrowApp.controller('UserCtrl', function ($controller, $scope,$http,$routeParams, UserService, BoneService) {
+  var user = $routeParams.user;
+  $scope.getendpoint = BoneService.user;
+  $scope.serviceParams = {user: user};
+
+  angular.extend(this, $controller('MarrowCtrl', {$scope: $scope}));
+  $scope._update = function() {
+    $scope.iFollow.$promise.then(function(result) {
+      console.log(result.me);
+      $scope.templateUrl = result.me === user? "/partials/default.html": "/partials/random.html";
+    });
+  };
+
+});
 
 marrowApp.controller('UserSettingCtrl', function ($scope,$http,$location) {
   $scope.oldPassword = '';
@@ -296,42 +190,6 @@ marrowApp.controller('UserSettingCtrl', function ($scope,$http,$location) {
       }
     });
   };
-});
-
-function addLink($scope) {
-  injector = angular.injector(['ng']);
-  $http = injector.get('$http');
-  return function() {
-    $http.post('/api/bones/add', $scope.postobj).success(function(data) {
-      if (data.success) {
-        $scope.postobj.url = "";
-        $scope.update();
-      }
-    });
-  };
-}
-
-
-marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams, UserService, BoneService) {
-  check_login();
-  $scope.url = "";
-  $scope.title = "";
-  $scope.toggleSubscribe = toggleSubscribe($http, $scope);
-  $scope.delete = deleteLink($scope);
-
-  var user = $routeParams.user;
-  $scope.bone = BoneService.user({user: user});
-  $scope.postobj = {url: "", title: ""};
-  $scope.addLink = addLink($scope);
-
-  $scope.iFollow = UserService.follows({user:user},function(result) {
-    $scope.templateUrl = result.me === user? "/partials/default.html": "/partials/random.html";
-  });
-
-  $scope.update = function() {
-    $scope.bone = BoneService.user({user: user});
-  };
-
 });
 
 marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route) {
