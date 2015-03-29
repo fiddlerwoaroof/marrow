@@ -2,7 +2,7 @@
   <h2 class="section-title">
     <button type="submit"
             ng-class="['sub-ctrl']"
-            ng-click="toggleSubscribe('boo')">{{subscribeLabel}}</button>
+            ng-click="toggleSubscribe('boo')">{{iFollow.follows ? 'unSubscribe' : 'Subscribe'}}</button>
     <a class="user-link"
        ng-href="{{path('UserCtrl', {'user': bone.sectionTitle})}}">
       {{path('UserCtrl', {'user': bone.sectionTitle})}}

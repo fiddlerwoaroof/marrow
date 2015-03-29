@@ -96,11 +96,11 @@ marrowApp.controller('LoginCtrl', function ($scope,$http,$route,$location) {
 marrowApp.controller('RootCtrl', function ($scope,$http,$location,$route) {
   $scope.url = "";
   $scope.title = "";
-  $scope.sectionTitle = "";
+  $scope.bone.sectionTitle = "";
 
   $scope.update = function() {
     return $http.get(getendpoint).success(function(data) {
-      $scope.sectionTitle = data.sectionTitle;
+      $scope.bone.sectionTitle = data.sectionTitle;
       $scope.bone = data.marrow;
     });
   };
@@ -112,7 +112,7 @@ marrowApp.controller('RootCtrl', function ($scope,$http,$location,$route) {
   }).finally(function (){
 
     $scope.update().success(function(data) {
-      $scope.sectionTitle = data.sectionTitle;
+      $scope.bone.sectionTitle = data.sectionTitle;
       $scope.bone = data.marrow;
       if (afterGet !== undefined) {afterGet($scope,$http,$route);}
     });
@@ -128,13 +128,9 @@ function controllerFactory(name, getendpoint, cb, afterGet) {
     us=UserService;
     $scope.url = "";
     $scope.title = "";
-    $scope.sectionTitle = "";
+    //$scope.sectionTitle = "";
     $scope.friends = SubscribedTo.get();
 
-    $scope.gravURL = function(uid) {
-      var hash = CryptoJS.MD5(uid);
-      return '//gravatar.com/avatar/'+hash+'?d=identicon&s=24';
-    };
     $scope.update = function() {
       var config = {params: $scope.args? $scope.args: {}};
       q = config;
@@ -151,21 +147,51 @@ function controllerFactory(name, getendpoint, cb, afterGet) {
 
       $scope.update().success(function(data) {
         $scope.bone = data;
-        if (afterGet !== undefined) {afterGet($scope,$http,$route, null, SubscribedTo);}
+        if (afterGet !== undefined) {afterGet($scope,$http,$route, null, SubscribedTo, UserService);}
       });
 
-      if (cb !== undefined) {cb($scope,$http,$route, null, SubscribedTo);}
+      if (cb !== undefined) {cb($scope,$http,$route, null, SubscribedTo, UserService);}
     });
   });
 }
 
-function toggleSubscribe($http,$scope) {
+controllerFactory('RandomMarrowCtrl', '/api/bones/random',
+  function($scope,$http, _, __, ___, UserService) {
+    $scope.toggleSubscribe = toggleSubscribe($http, $scope, UserService);
+  },
+  function ($scope,$http, _, __, ___, UserService) {
+    $scope.args = {last: $scope.bone.sectionTitle};
+    $scope.iFollow = UserService.follows({user:$scope.bone.sectionTitle});
+});
+
+controllerFactory('SubscriptionCtrl', '/api/bones/subscriptions',
+  function($scope, $http, Bones, SubscribedTo){
+    $scope.gravURL = function(uid) {
+      var hash = CryptoJS.MD5(uid);
+      return '//gravatar.com/avatar/'+hash+'?d=identicon&s=24';
+    };
+    $scope.emptyOrEquals = function(actual, expected) {
+      if (!expected) { return true;}
+      else {return actual === expected;}
+    };
+  });
+
+controllerFactory('MarrowCtrl', '/api/bones', function($scope,$http,$route) {
+  $scope.delete = deleteLink($scope);
+  $scope.postobj = {
+    url: "",
+    title: ""
+  };
+  $scope.addLink = addLink($scope);
+});
+
+function toggleSubscribe($http,$scope, UserService) {
   return function (txt) {
-    console.log(txt);
-    var postObj = {"from":$scope.sectionTitle, "to":$scope.sectionTitle};
+    console.log($scope.bone.sectionTitle);
+    var postObj = {"from":$scope.bone.sectionTitle, "to":$scope.bone.sectionTitle};
     var promise = null;
 
-    if ($scope.subscribed) {
+    if ($scope.iFollow.follows) {
       promise = $http.post('/api/bones/unsubscribe', postObj);
     } else {
       promise = $http.post('/api/bones/subscribe', postObj);
@@ -175,8 +201,7 @@ function toggleSubscribe($http,$scope) {
         console.log('bing!');
         result = JSON.parse(result);
         if (result) {
-          $scope.subscribed = ! $scope.subscribed;
-          $scope.subscribeLabel = $scope.subscribed? 'unSubscribe': 'Subscribe';
+          $scope.iFollow.follows = ! $scope.iFollow.follows;
         }
       });
   };
@@ -184,7 +209,7 @@ function toggleSubscribe($http,$scope) {
 
 function unsubscribe($http,$scope) {
   return function () {
-    var postObj = {"from":$scope.sectionTitle};
+    var postObj = {"from":$scope.bone.sectionTitle};
     $http.post('/api/bones/unsubscribe', postObj);
 
     $scope.unsubscribeClass='is-hidden';
@@ -194,7 +219,7 @@ function unsubscribe($http,$scope) {
 
 function subscribe($http,$scope) {
   return function () {
-    var postObj = {"to":$scope.sectionTitle};
+    var postObj = {"to":$scope.bone.sectionTitle};
     $http.post('/api/bones/subscribe', postObj);
 
     $scope.unsubscribeClass='';
@@ -247,12 +272,8 @@ marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams, UserServic
   };
   $scope.addLink = addLink($scope);
 
-  $scope.follows = UserService.follows({'user': user}, function(result) {
+  $scope.iFollow = UserService.follows({user:user},function(result) {
     $scope.templateUrl = result.me === user? "/partials/default.html": "/partials/random.html";
-    if (result.me !== user) {
-      $scope.subscribed = result.follows;
-      $scope.subscribeLabel = $scope.subscribed ? 'unSubscribe': 'Subscribe';
-    }
   });
 
   $scope.update = function() {
@@ -260,30 +281,6 @@ marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams, UserServic
   };
 
 });
-
-controllerFactory('RandomMarrowCtrl', '/api/bones/random',
-  function($scope,$http) {
-    $scope.toggleSubscribe = toggleSubscribe($http, $scope);
-  },
-  function ($scope,$http) {
-    $scope.args = {last: $scope.sectionTitle};
-    $http.get('/api/user/follows/'+$scope.bone.sectionTitle).success(function(result) {
-      $scope.subscribed = result.follows;
-      $scope.subscribeLabel = $scope.subscribed ? 'unSubscribe': 'Subscribe';
-  });
-});
-
-controllerFactory('SubscriptionCtrl', '/api/bones/subscriptions',
-  function($scope, $http, Bones, SubscribedTo){
-    $scope.gravURL = function(uid) {
-      var hash = CryptoJS.MD5(uid);
-      return '//gravatar.com/avatar/'+hash+'?d=identicon&s=24';
-    };
-    $scope.emptyOrEquals = function(actual, expected) {
-      if (!expected) { return true;}
-      else {return actual === expected;}
-    };
-  });
 
 marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route) {
   $scope.random = function() {
@@ -298,11 +295,3 @@ marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route) {
   };
 });
 
-controllerFactory('MarrowCtrl', '/api/bones', function($scope,$http,$route) {
-  $scope.delete = deleteLink($scope);
-  $scope.postobj = {
-    url: "",
-    title: ""
-  };
-  $scope.addLink = addLink($scope);
-});
