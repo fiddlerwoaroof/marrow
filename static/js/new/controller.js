@@ -217,6 +217,20 @@ marrowApp.controller('UserSettingCtrl', function ($scope,$http,$location) {
   };
 });
 
+function addLink($scope) {
+  injector = angular.injector(['ng']);
+  $http = injector.get('$http');
+  return function() {
+    $http.post('/api/bones/add', $scope.postobj).success(function(data) {
+      if (data.success) {
+        $scope.postobj.url = "";
+        $scope.update();
+      }
+    });
+  };
+}
+
+
 marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams, UserService, BoneService) {
   check_login();
   $scope.url = "";
@@ -227,15 +241,11 @@ marrowApp.controller('UserCtrl', function ($scope,$http,$routeParams, UserServic
   var user = $routeParams.user;
   $scope.bone = BoneService.user({user: user});
 
-  $scope.addLink = function(url) {
-    var postObj = {"url":url, "title":$scope.title};
-    BoneService.add(postObj, function(data) {
-      if (data.success) {
-        $scope.update();
-        $scope.url = "";
-      }
-    });
+  $scope.postobj = {
+    url: "",
+    title: ""
   };
+  $scope.addLink = addLink($scope);
 
   $scope.follows = UserService.follows({'user': user}, function(result) {
     $scope.templateUrl = result.me === user? "/partials/default.html": "/partials/random.html";
@@ -290,17 +300,9 @@ marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route) {
 
 controllerFactory('MarrowCtrl', '/api/bones', function($scope,$http,$route) {
   $scope.delete = deleteLink($scope);
-
-  function addLink($scope) {
-    injector = angular.injector(['ng']);
-    $http = injector.get('$http');
-    return function(url) {
-      var postObj = {"url":url, "title":$scope.title};
-      $http.post('/api/bones/add', postObj).success(function(data) {
-        if (data.success) { $scope.update(); }
-      });
-    };
-  }
-
+  $scope.postobj = {
+    url: "",
+    title: ""
+  };
   $scope.addLink = addLink($scope);
 });

@@ -11,8 +11,8 @@
     </a>
   </h2>
   <form>
-    <input type="text" ng-model="$parent.url" placeholder="http:// . . ."/>
-    <button type="submit" ng-click="addLink(url)">+</button>
+    <input type="text" ng-model="postobj.url" placeholder="http:// . . ."/>
+    <button type="submit" ng-click="addLink(postobj.url)">+</button>
   </form>
   <ul class="bone-list">
     <li ng-repeat="marrow in bone.marrow"
