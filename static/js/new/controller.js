@@ -128,7 +128,6 @@ function controllerFactory(name, getendpoint, cb, afterGet) {
     us=UserService;
     $scope.url = "";
     $scope.title = "";
-    //$scope.sectionTitle = "";
     $scope.friends = {data: []};
 
     $scope.update = function() {
@@ -175,10 +174,6 @@ controllerFactory('RandomMarrowCtrl', '/api/bones/random',
 
 controllerFactory('SubscriptionCtrl', '/api/bones/subscriptions',
   function($scope, $http, Bones, SubscribedTo){
-    $scope.gravURL = function(uid) {
-      var hash = CryptoJS.MD5(uid);
-      return '//gravatar.com/avatar/'+hash+'?d=identicon&s=24';
-    };
     $scope.emptyOrEquals = function(actual, expected) {
       if (!expected) { return true;}
       else {return actual === expected;}
