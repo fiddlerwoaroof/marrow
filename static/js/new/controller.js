@@ -129,7 +129,7 @@ function controllerFactory(name, getendpoint, cb, afterGet) {
     $scope.url = "";
     $scope.title = "";
     //$scope.sectionTitle = "";
-    $scope.friends = SubscribedTo.get();
+    $scope.friends = {data: []};
 
     $scope.update = function() {
       var config = {params: $scope.args? $scope.args: {}};
@@ -147,6 +147,15 @@ function controllerFactory(name, getendpoint, cb, afterGet) {
 
       $scope.update().success(function(data) {
         $scope.bone = data;
+
+        var following_set = Object.create(null);
+        $scope.bone.marrow.map(function(o) {
+          if (!(o.poster in following_set)) {
+            following_set[o.poster] = true;
+            $scope.friends.data.push(o.poster);
+          }
+        });
+
         if (afterGet !== undefined) {afterGet($scope,$http,$route, null, SubscribedTo, UserService);}
       });
 
