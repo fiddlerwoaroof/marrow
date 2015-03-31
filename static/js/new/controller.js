@@ -117,9 +117,23 @@ marrowApp.controller('RandomMarrowCtrl', function ($controller, $scope,$http,$lo
 });
 
 marrowApp.controller('SubscriptionCtrl', function ($controller,$scope,$http,$location,$route, SubscribedTo, BoneService, UserService) {
+  $scope.uncheckOthers = function (list) {
+    for (var n in list) {
+      if (n !== 'all' && list[n] === true) { list[n] = false; }
+    }
+  };
+
+  $scope.friend = Object.create(null);
+  $scope.friend.all = true;
+
   $scope.emptyOrEquals = function(actual, expected) {
-    if (!expected) { return true; }
-    else {return actual === expected; }
+    console.log(actual, expected);
+    var result = false;
+    if (!expected) { result = true; }
+    else if (expected.all) { result = true; }
+    else {result = expected[actual]; }
+    console.log(result);
+    return result;
   };
 
   $scope._update = function() {
