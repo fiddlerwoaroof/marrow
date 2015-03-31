@@ -3,8 +3,8 @@
   <form>
     <ul class="subscription-list">
       <li class="sub-filter">
-        <input name="all" type="radio" ng-model="friend" ng-value=""></input>
-        <label for="all">[All]</label>
+        <input id="sub-all" type="radio" ng-model="friend" ng-value=""></input>
+        <label for="sub-all">[All]</label>
       </li>
       <li class="sub-filter" ng-repeat="friend in friends.data">
         <input id="sub-{{$index+1}}" type="radio" ng-model="$parent.friend" ng-value="friend"></input>
