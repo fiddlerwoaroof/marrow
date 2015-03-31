@@ -2,11 +2,16 @@
   <h2 class="section-title">{{bone.sectionTitle}}</h2>
   <form>
     <ul class="subscription-list">
-      <li>
-        <input type="radio" ng-model="friend" ng-value="">[Everyone]</input>
+      <li class="sub-filter">
+        <input name="all" type="radio" ng-model="friend" ng-value=""></input>
+        <label for="all">[All]</label>
       </li>
-      <li ng-repeat="friend in friends.data">
-        <input type="radio" ng-model="$parent.friend" ng-value="friend">{{friend}}</input>
+      <li class="sub-filter" ng-repeat="friend in friends.data">
+        <input id="sub-{{$index+1}}" type="radio" ng-model="$parent.friend" ng-value="friend"></input>
+        <label for="sub-{{$index+1}}" >
+          <span class="narrow"><gravatar-image user-name="{{friend}}"></gravatar-image></span>
+          <span class="wide">{{friend}}</span>
+        </label>
       </li>
     </ul>
   </form>

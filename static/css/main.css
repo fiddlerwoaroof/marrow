@@ -94,11 +94,48 @@ img {
 
 ul.subscription-list {
   text-align: center;
-  background: #eee;
+  /*background: #eee;*/
 }
 
-ul.subscription-list li{
-  display: inline;
+ul.subscription-list::after {
+  content: " ";
+  clear: both;
+  display: block;
+}
+
+li.sub-filter {
+  width: 12.5%;
+  margin: 5px;
+  padding: 0px;
+  display: block;
+  float: left;
+}
+
+li.sub-filter label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  border: black solid thin;
+  border-radius: 10px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  display: block;
+  vertical-align: middle;
+  height: 100%;
+  width: 100%;
+  padding: 5px;
+}
+
+li.sub-filter input {
+  display: none;
+}
+
+li.sub-filter label:hover {
+  border: thin solid white;
+  color: white;
+  background: linear-gradient(to bottom, #eee 0%, #bbb 75%, #888 100%);
 }
 
 /* @group State Definitions */
@@ -343,6 +380,10 @@ a.user-settings:hover {
 
 /* Generic Small Devices */
 @media (max-width: 443px) {
+
+  .wide {
+    display: none;
+  }
 
   header {
     position: fixed;
