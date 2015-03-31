@@ -6,9 +6,9 @@
         <input id="sub-all" type="checkbox" ng-model="friend.all" ng-click="uncheckOthers(friend)"></input>
         <label for="sub-all">[All]</label>
       </li>
-      <li class="sub-filter" ng-repeat="name in friends.data">
+      <li class="sub-filter" ng-repeat="name in friends.data | orderBy:name">
         <input id="sub-{{$index+1}}" type="checkbox" ng-model="friend[name]" ng-click="friend.all = false"></input>
-        <label for="sub-{{$index+1}}" >
+        <label for="sub-{{$index+1}}" > <!-- TODO: figger out how to abstract this + combine with the other user badge -->
           <span class="narrow"><gravatar-image user-name="{{name}}"></gravatar-image></span>
           <span class="wide">{{name}}</span>
         </label>
@@ -25,7 +25,7 @@
         data-poster="{{marrow.poster}}">
       <div class="bone-details">
         <span ng-if="marrow.title">
-          <a href="{{marrow.url}}" class="list-item" >{{marrow.title}}</a>
+          <a href="{{marrow.url}}" class="list-item">{{marrow.title}}</a>
           <br />
         </span>
         <a href="{{marrow.url}}" ng-class="{'de-emphasize':marrow.title}" >{{marrow.url}}</a>
@@ -33,4 +33,5 @@
       <user-badge poster="{{marrow.poster}}"></user-badge>
     </li>
   </ul>
+  <a ng-click="backAPage()" style="display:block; margin-bottom: 2em" />&lt;&lt; Back</a>
 </section>

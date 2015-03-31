@@ -7,6 +7,7 @@ from . import database
 import urlparse
 import json
 from marrow_config import config
+import dateutil.parser
 
 bone_blueprint = Blueprint('bone', __name__)
 
@@ -138,6 +139,7 @@ def subscriptions(before):
         with database.get_db().cursor() as cur:
             args = (username,50) # only 50 results
             if before is not None:
+                before = dateutil.parser.parse(before)
                 args = args + (before,)
             cur.callproc("get_bones", args)
             result['marrow'] = [

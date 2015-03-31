@@ -126,6 +126,14 @@ marrowApp.controller('SubscriptionCtrl', function ($controller,$scope,$http,$loc
   $scope.friend = Object.create(null);
   $scope.friend.all = true;
 
+  $scope.backAPage = function() {
+    var bone = $scope.bone.marrow;
+    var lastitem = bone[bone.length-1].posted;
+    console.log(lastitem);
+    $scope.bone = BoneService.subscriptions({before: lastitem});
+  };
+  $scope.bs = BoneService;
+
   $scope.emptyOrEquals = function(actual, expected) {
     console.log(actual, expected);
     var result = false;

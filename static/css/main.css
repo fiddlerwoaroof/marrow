@@ -86,6 +86,7 @@ img {
   display: inline-block;
   vertical-align: middle;
 }
+
 .sub-ctrl {
   display: inline-block;
   vertical-align: middle;
@@ -104,8 +105,8 @@ ul.subscription-list::after {
 }
 
 li.sub-filter {
-  width: 12.5%;
-  margin: 5px;
+  width: 15.50%;
+  margin: 5px 0.58%;
   padding: 0px;
   display: block;
   float: left;
@@ -117,6 +118,7 @@ li.sub-filter label {
   text-overflow: ellipsis;
 
   border: black solid thin;
+  background: #eee;
   border-radius: 10px;
   height: 30px;
   line-height: 30px;
@@ -132,16 +134,18 @@ li.sub-filter input {
   display: none;
 }
 
+li.sub-filter label:hover,
 li.sub-filter input:checked + label {
-  border: thin solid white;
+  border: #eee thin solid;
   color: white;
-  background: linear-gradient(to bottom, #eee 0%, #bbb 75%, #888 100%);
+}
+
+li.sub-filter input:checked + label {
+  background: linear-gradient(to top, #eee 0%, #bbb 75%, #888 100%);
 }
 
 li.sub-filter label:hover {
-  border: thin solid white;
-  color: white;
-  background: #aaa;
+  background: linear-gradient(to bottom, #eee 0%, #bbb 75%, #888 100%);
 }
 
 /* @group State Definitions */
@@ -240,13 +244,13 @@ main form input[type="text"] {
   width: 315px;
 }
 .bone-list li {
-  padding-right: 1em;
+  /*padding-right: 1em;*/
   margin-bottom: 12px;
   width: 100%;
 }
 
 .bone-list .bone-details {
-  width: 80%;
+  width: 84%;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -405,6 +409,7 @@ a.user-settings:hover {
 
   main {
     padding-left: .5em;
+    padding-right: .5em;
   }
 
   #nav-main {

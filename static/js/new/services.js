@@ -10,12 +10,11 @@ serviceModule.factory('UserBone', ['$resource',
 
 serviceModule.factory('BoneService', ['$resource',
   function boneFactory($resource){
-    console.log('hi');
     return $resource('/api/bones', {}, {
       add: {'method': 'POST', 'url': '/api/bones/add'},
       user: {'method': 'GET', 'url': '/api/bones/u/:user', params: {user: '@user'}},
       random: {'method': 'GET', 'url': '/api/bones/random'},
-      subscriptions: {'method': 'GET', 'url': '/api/bones/subscriptions'},
+      subscriptions: {'method': 'GET', 'url': '/api/bones/subscriptions/:before', 'paramDefaults': {'before': null}, 'params': {before: '@before'}},
     });
 }]);
 
