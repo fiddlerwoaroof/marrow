@@ -132,10 +132,16 @@ li.sub-filter input {
   display: none;
 }
 
-li.sub-filter label:hover {
+li.sub-filter input:checked + label {
   border: thin solid white;
   color: white;
   background: linear-gradient(to bottom, #eee 0%, #bbb 75%, #888 100%);
+}
+
+li.sub-filter label:hover {
+  border: thin solid white;
+  color: white;
+  background: #aaa;
 }
 
 /* @group State Definitions */

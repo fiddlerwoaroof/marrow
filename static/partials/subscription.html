@@ -3,14 +3,14 @@
   <form>
     <ul class="subscription-list">
       <li class="sub-filter">
-        <input id="sub-all" type="radio" ng-model="friend" ng-value=""></input>
+        <input id="sub-all" type="checkbox" ng-model="friend.all" ng-click="uncheckOthers(friend)"></input>
         <label for="sub-all">[All]</label>
       </li>
-      <li class="sub-filter" ng-repeat="friend in friends.data">
-        <input id="sub-{{$index+1}}" type="radio" ng-model="$parent.friend" ng-value="friend"></input>
+      <li class="sub-filter" ng-repeat="name in friends.data">
+        <input id="sub-{{$index+1}}" type="checkbox" ng-model="friend[name]" ng-click="friend.all = false"></input>
         <label for="sub-{{$index+1}}" >
-          <span class="narrow"><gravatar-image user-name="{{friend}}"></gravatar-image></span>
-          <span class="wide">{{friend}}</span>
+          <span class="narrow"><gravatar-image user-name="{{name}}"></gravatar-image></span>
+          <span class="wide">{{name}}</span>
         </label>
       </li>
     </ul>
