@@ -243,6 +243,16 @@ main form {
 main form input[type="text"] {
   width: 315px;
 }
+
+.more-link {
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  margin-bottom: 2em;
+  text-align: center;
+  background: #eee;
+}
+
 .bone-list li {
   /*padding-right: 1em;*/
   margin-bottom: 12px;

@@ -22,7 +22,6 @@ marrowApp.controller('LoginCtrl', function ($scope,$http,$route,$location) {
     injector = angular.injector(['ng']);
     $http = injector.get('$http');
     return $http.get("/api/user/check").success(function(is_loggedon) {
-      console.log(is_loggedon);
       if (is_loggedon.result === true) {
         angular.element(document.body).addClass('is-logged-on');
       }
@@ -38,7 +37,6 @@ marrowApp.controller('LoginCtrl', function ($scope,$http,$route,$location) {
     var username = $scope.username;
     var password = $scope.password;
     var postObj = {"username":username, "password": password};
-    console.log(postObj);
     $http.post("/api/user/add", postObj)
     .success(function(added_user) {
       if (added_user.status === true) {$location.url('/');}
@@ -65,7 +63,6 @@ marrowApp.controller('RootCtrl', function ($scope,$http,$location,$route, Subscr
   $scope.title = "";
 
   $scope.toggleSubscribe = function (txt) {
-    console.log($scope.bone.sectionTitle);
     var postObj = {"from":$scope.bone.sectionTitle, "to":$scope.bone.sectionTitle};
     var promise = null;
 
@@ -76,7 +73,6 @@ marrowApp.controller('RootCtrl', function ($scope,$http,$location,$route, Subscr
     }
 
     return promise.success(function(result) {
-      console.log('bing!');
       result = JSON.parse(result);
       if (result) {
         $scope.iFollow.follows = ! $scope.iFollow.follows;
@@ -86,14 +82,12 @@ marrowApp.controller('RootCtrl', function ($scope,$http,$location,$route, Subscr
 
   $scope.bone = {sectionTitle: "", marrow: []};
   $scope.friends = {data: []};
-  $scope.args = {last: ""};
 
   $scope.update = function() {
     var config = {params: $scope.args? $scope.args: {}};
     return $scope.getendpoint($scope.serviceParams, function(data) {
       $scope.bone.sectionTitle = data.sectionTitle;
       $scope.bone.marrow = data.marrow;
-      $scope.args = {last: $scope.bone.sectionTitle};
       $scope.iFollow = UserService.follows({user:$scope.bone.sectionTitle});
     }).$promise.then($scope._update);
   };
@@ -129,26 +123,27 @@ marrowApp.controller('SubscriptionCtrl', function ($controller,$scope,$http,$loc
   $scope.backAPage = function() {
     var bone = $scope.bone.marrow;
     var lastitem = bone[bone.length-1].posted;
-    console.log(lastitem);
-    $scope.bone = BoneService.subscriptions({before: lastitem});
+    BoneService.subscriptions({before: lastitem}).$promise.then(function(r) {
+      while (r.marrow.length) {
+        $scope.bone.marrow.push(r.marrow.shift());
+      }
+    });
+    $scope._update();
   };
-  $scope.bs = BoneService;
 
   $scope.emptyOrEquals = function(actual, expected) {
-    console.log(actual, expected);
     var result = false;
     if (!expected) { result = true; }
     else if (expected.all) { result = true; }
     else {result = expected[actual]; }
-    console.log(result);
     return result;
   };
 
+  $scope.following_set = Object.create(null);
   $scope._update = function() {
-    var following_set = Object.create(null);
     $scope.bone.marrow.map(function(o) {
-      if (!(o.poster in following_set)) {
-        following_set[o.poster] = true;
+      if (!(o.poster in $scope.following_set)) {
+        $scope.following_set[o.poster] = true;
         $scope.friends.data.push(o.poster);
       }
     });
@@ -178,7 +173,6 @@ marrowApp.controller('MarrowCtrl', function ($controller,$scope,$http,$location,
   };
 
   if ($scope.getendpoint === undefined) {
-    console.log('getendpointunset');
     $scope.getendpoint = BoneService.get;
   }
   angular.extend(this, $controller('RootCtrl', {$scope: $scope}));
@@ -192,7 +186,6 @@ marrowApp.controller('UserCtrl', function ($controller, $scope,$http,$routeParam
   angular.extend(this, $controller('MarrowCtrl', {$scope: $scope}));
   $scope._update = function() {
     $scope.iFollow.$promise.then(function(result) {
-      console.log(result.me);
       $scope.templateUrl = result.me === user? "/partials/default.html": "/partials/random.html";
     });
   };
@@ -215,6 +208,11 @@ marrowApp.controller('UserSettingCtrl', function ($scope,$http,$location) {
 });
 
 marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route) {
+  $scope.subscriptions = function() {
+    if ($location.url() !== '/subscriptions') { $location.url('/subscriptions'); }
+    else { $route.reload(); }
+  };
+
   $scope.random = function() {
     if ($location.url() !== '/random') { $location.url('/random'); }
     else { $route.reload(); }
