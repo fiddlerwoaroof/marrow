@@ -1,5 +1,7 @@
 <section id="main">
-  <h2 class="section-title">{{bone.sectionTitle}} ({{filtered.length}} items)</h2>
+  <h2 class="section-title">
+    {{bone.sectionTitle}} ({{filtered.length}} items)
+  </h2>
   <form>
     <ul class="subscription-list">
       <li class="sub-filter">
@@ -17,7 +19,7 @@
   </form>
   <ul class="bone-list">
     <li ng-repeat="marrow in filtered = (bone.marrow | filter:{poster:friend}:emptyOrEquals)"
-        class="bone-item"
+        ng-class="['bone-item', marrow.colorClass]"
         data-id="{{marrow.id}}"
         data-url="{{marrow.url}}"
         data-posted="{{marrow.posted}}"

@@ -7,6 +7,26 @@ http://marrow.elangley.org/css/main.css */
 @import url(//fonts.googleapis.com/css?family=Ek+Mukta:200,400,800&subset=latin,latin-ext);
 @import url(//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css);
 
+/* @group date based classes */
+
+li.bone-item {
+  border-left: 7px solid white;
+  padding-left: 10px;
+}
+li.bucket-0 {border-left-color: hsl(0,  0%, 0%);}
+li.bucket-1 {border-left-color: hsl(36, 0%,10%);}
+li.bucket-2 {border-left-color: hsl(72, 0%,20%);}
+li.bucket-3 {border-left-color: hsl(108,0%,30%);}
+li.bucket-4 {border-left-color: hsl(144,0%,40%);}
+li.bucket-5 {border-left-color: hsl(180,0%,50%);}
+li.bucket-6 {border-left-color: hsl(216,0%,60%);}
+li.bucket-7 {border-left-color: hsl(252,0%,70%);}
+li.bucket-8 {border-left-color: hsl(288,0%,80%);}
+li.bucket-9 {border-left-color: hsl(324,0%,90%);}
+
+
+/* @end */
+
 /* @group Browser Resets */
 
 html {
@@ -172,19 +192,18 @@ body {
 /* @group Header Module */
 
 header {
-  padding: 20px;
-  background: #300;
   background: #000;
   font-family: 'Josefin Sans', sans-serif;
 }
 
 header .site-logo {
-  text-align: center;
   color: white;
-  font-size: 1.5em;
+  text-align: center;
   text-transform: uppercase;
+  height: 3.5em;
+  font-size: 1.5em;
   letter-spacing: .2em;
-  margin: .2em 0 -.1em;
+  line-height: 3.5em;
 }
 
 /* @end */
@@ -250,12 +269,11 @@ main form input[type="text"] {
   width: 100%;
   margin-bottom: 2em;
   text-align: center;
-  background: #eee;
+  background: hsl(324,0%,90%);
 }
 
 .bone-list li {
-  /*padding-right: 1em;*/
-  margin-bottom: 12px;
+  padding-bottom: 12px;
   width: 100%;
 }
 
@@ -406,17 +424,10 @@ a.user-settings:hover {
   }
 
   header {
-    position: fixed;
-    padding: 9px;
-    height: 40px;
+    /*position: fixed;*/
     width: 100%;
   }
   
-  header .site-logo {
-    font-size: 20px;
-    margin: .2em 0 -.1em;
-  }
-
   main {
     padding-left: .5em;
     padding-right: .5em;
@@ -429,25 +440,23 @@ a.user-settings:hover {
     width: 100%;
     top: 0px;
     margin: 0 auto;
-    padding: 10px;
     visibility: hidden;
   }
 
   #nav-main:after {
     font-family: "FontAwesome";
-    font-size: 20px;
-    padding: 10px;
     content: "\f0c9";
     display: block;
     color: white;
-    width: 40px;
-    height: 40px;
     position: absolute;
-    line-height: 22px;
-    top: 0;
-    left: 0;
+    font-size: 1.5em;
+    height: 3.5em;
+    line-height: 3.5em;
+    padding: 0px 1.5em;
+    top: 0px;
+    left: 0px;
     visibility: visible;
-    box-sizing: border-box;
+    Box-sizing: border-box;
   }
   
   #nav-main:hover:after {
@@ -456,11 +465,15 @@ a.user-settings:hover {
   #nav-main ul {
     position: fixed;
     background: white;
-    top: 40px;
-    left: 0;
+    font-size: 1.5em;
+    top: 3.5em;
+    left: 0px;
     height: 100%;
     width: 100%;
     z-index: 10;
+  }
+  #nav-main ul li {
+    font-size: 18px;
   }
   #nav-main:hover ul {
     visibility: visible;
@@ -506,11 +519,23 @@ a.user-settings:hover {
   form input[type="password"] {
   }
 
+  main::before {
+    display: block;
+    content: " ";
+    font-size: 1.5em;
+    height: 3.5em;
+  }
   main {
     position: absolute;
     width: 100%;
-    margin-top: 75px;
+    margin-top: 15px;
     /*overflow: hidden;*/
   }
   
 }
+
+/*
+vim: set foldmethod=marker:
+vim: set foldmarker=@group,@end:
+vim: set nofoldenable:
+*/
