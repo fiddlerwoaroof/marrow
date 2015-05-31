@@ -154,13 +154,13 @@ marrowApp.controller('SubscriptionCtrl', function ($controller,$scope,$http,$loc
     last = Date.parse(last);
     var range = first - last;
     console.log(range);
-    var bucketWidth = Math.ceil(range/10);
+    var bucketWidth = Math.ceil(range/20);
     var buckets = [];
     var bucketClasses= {};
     for (var x = first; x > last; x -= bucketWidth) {
       buckets.push(x);
     }
-    for (var x = 0; x < 10; x++) { // jshint ignore:line
+    for (var x = 0; x < 20; x++) { // jshint ignore:line
       var bucket = x;
       bucketClasses[buckets[bucket]] = 'bucket-'+bucket;
     }
