@@ -81,7 +81,7 @@ def submit_link():
                 result['id'] = res[0]
             else:
                 db.rollback()
-    return json.dumps(result)
+    return json.dumps(result), 200, {'Content-Type':'application/json'}
 
 @bone_blueprint.route('',defaults={'username':None}, methods=['GET'])
 @bone_blueprint.route('/u/<username>', methods=['GET'])
@@ -129,23 +129,33 @@ def subscribe():
             result = True
     return json.dumps(result);
 
-@bone_blueprint.route('/subscriptions', defaults={'before':None})
-@bone_blueprint.route('/subscriptions/<before>')
-def subscriptions(before):
-    username = None
+@bone_blueprint.route('/subscriptions', defaults={'before':None, 'count': None})
+@bone_blueprint.route('/subscriptions/<before>', defaults={'count': None})
+@bone_blueprint.route('/subscriptions/count/<int:count>', defaults={'before': None})
+@cross_origin(allow_headers='Content-Type')
+def subscriptions(before, count):
     result = {'marrow':[], 'sectionTitle': 'Subscriptions'}
-    if 'username' in session:
+    db = database.get_db()
+    username = None
+    if 'username' in request.args:
+        username = request.args['username']
+        if 'ak' not in request.args: username = None
+        elif not database.check_ak(db, username, request.args['ak']): username = None
+    if username is None and 'username' in session:
         username = session['username']
-        with database.get_db().cursor() as cur:
-            args = (username,50) # only 50 results
+
+    if username is not None:
+        with db.cursor() as cur:
+            if count is None or count > 200: count = 50  # 50 results or up to 200 results
+            args = (username,count)
             if before is not None:
                 before = dateutil.parser.parse(before)
                 args = args + (before,)
             cur.callproc("get_bones", args)
             result['marrow'] = [
-                    dict(poster=poster, url=url,title=title,posted=posted.isoformat())
-                        for url,title,posted,poster
-                        in cur.fetchall()
+                dict(poster=poster, url=url,title=title,posted=posted.isoformat())
+                    for url,title,posted,poster
+                    in cur.fetchall()
             ]
     return json.dumps(result)
 
