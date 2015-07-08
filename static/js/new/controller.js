@@ -1,5 +1,6 @@
 var marrowApp = angular.module('marrowApp', ['ngRoute', 'marrowApp.services', 'marrowApp.directives', 'marrowApp.utils',
-                                             'marrowApp.directives.boneList', 'marrowApp.directives.userBadge']);
+                                             'marrowApp.directives.boneList', 'marrowApp.directives.userBadge',
+                                             'angulartics', 'angulartics.google.analytics']);
 
 marrowApp.config(['$routeProvider',
   function($routeProvider) {
