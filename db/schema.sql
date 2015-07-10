@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS user_ak;
 DROP TABLE IF EXISTS user_subscriptions;
 DROP TABLE IF EXISTS user_links;
 DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS link_votes;
 CREATE TABLE users (
   id SERIAL UNIQUE NOT NULL,
   name TEXT UNIQUE NOT NULL CHECK (name <> ''),
@@ -26,6 +27,16 @@ CREATE TABLE user_subscriptions (
   to_id INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
   CHECK (fro_id != to_id),
   UNIQUE (fro_id, to_id),
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE link_votes (
+  id SERIAL UNIQUE NOT NULL,
+  user_id INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  link_id INTEGER NOT NULL REFERENCES links (id) ON DELETE CASCADE,
+  voted TIMESTAMP DEFAULT current_timestamp,
+  vote BIGINT DEFAULT 0,
+  UNIQUE (link_id,user_id,voted),
   PRIMARY KEY (id)
 );
 
