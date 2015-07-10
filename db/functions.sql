@@ -103,9 +103,9 @@ $$ LANGUAGE plpgsql;
 
 DROP FUNCTION IF EXISTS get_bone(text);
 CREATE OR REPLACE FUNCTION get_bone(username text)
-  RETURNS TABLE(name text, url text, title text, posted timestamp, linkid int) AS $$
+  RETURNS TABLE(name text, url text, title text, posted timestamp, linkid int, votes bigint) AS $$
 BEGIN
-  RETURN QUERY SELECT users.name, links.url, links.title, links.posted, links.id
+  RETURN QUERY SELECT users.name, links.url, links.title, links.posted, links.id, total_votes(links.id)
       FROM users
         INNER JOIN user_links ON user_links.user_id = users.id
         INNER JOIN links ON user_links.link_id = links.id

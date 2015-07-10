@@ -22,6 +22,15 @@ for handler in [urllib2.HTTPSHandler,urllib2.HTTPHandler]:
     opener.addheaders = useragent
     urllib2.install_opener(opener)
 
+import functools
+def as_json(f):
+    @functools.wraps(f)
+    def _inner(*a, **k):
+        res = f(*a, **k)
+        res = (json.dumps(res), 200, {'Content-Type': 'application/json'})
+        return res
+    return _inner
+        
 @bone_blueprint.route('/link/<linkid>', methods=['GET','DELETE'])
 @login_required
 def delete_link(linkid):
@@ -50,13 +59,28 @@ def clean_url(url):
 def get_title(url):
     return config.titlegetter.get_title(url)
 
+@bone_blueprint.route('/vote/total')
+@login_required
+@as_json
+def vote_link_total():
+    url = request.args['url'].encode('utf-8')
+    db = database.get_db()
+    result = dict(success=False, votes=None)
+    with db.cursor() as cur:
+        cur.callproc('total_votes', (url,))
+        dbresult, = cur.fetchone()
+    if dbresult is not None:
+        result['success'] = True
+        result['votes'] = dbresult
+    return result
+
 def vote_link_common(vote):
     obj = request.get_json()
     url = obj['url']
     db = database.get_db()
     result = dict(success=False, votes=None, myvote=None)
+    url = url.encode('utf-8')
     with db.cursor() as cur:
-        url = url.encode('utf-8')
         cur.callproc('vote_link', (url, current_user.id, vote))
         dbresult = cur.fetchone()
     print(dbresult, "<--- dbresult")
@@ -134,10 +158,10 @@ def data(username):
 
     result = {'marrow':[], 'sectionTitle': sectionTitle}
     with database.get_db().cursor() as cur:
-        cur.execute("SELECT url, title, posted, linkid from get_bone(%s);", (username,))
+        cur.execute("SELECT url, title, posted, linkid, votes from get_bone(%s);", (username,))
         result['marrow'] = [
-                dict(id=linkid, url=url,title=title,posted=posted.isoformat())
-                    for url,title,posted,linkid
+                dict(id=linkid, url=url,title=title,posted=posted.isoformat(),votes=votes)
+                    for url,title,posted,linkid,votes
                     in cur.fetchall()
         ]
     return json.dumps(result)

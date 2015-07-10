@@ -303,6 +303,16 @@ footer a.facebook-link:hover {
   background: #ddd;
 }
 
+.vote-disp::before {
+  content: '{';
+  font-size: 120%;
+}
+
+.vote-disp::after {
+  content: '}';
+  font-size: 120%;
+}
+
 .linkinfo {
   display: inline-block;
 }
@@ -404,6 +414,10 @@ div.marrow {
 }
 a.delete-link {
   color: red;
+  display: inline-block;
+  vertical-align: top;
+  position: relative;
+  top: 0.2em;
   /*position: absolute;*/
   /*margin-left: -1em;*/
 }
