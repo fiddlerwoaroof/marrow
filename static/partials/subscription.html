@@ -24,8 +24,13 @@
         data-url="{{marrow.url}}"
         data-posted="{{marrow.posted}}"
         data-title="{{marrow.title}}"
-        data-poster="{{marrow.poster}}">
+        data-poster="{{marrow.poster}}"
+        data-votes="{{marrow.votes}}">
       <div class="bone-details">
+        <span class="voting">
+          <span class="score">{{marrow.votes}}</span>
+          <button class="upVote fa fa-plus" ng-click="upVote(marrow)"></button>
+        </span>
         <span ng-if="marrow.title">
           <a href="{{marrow.url}}" class="list-item">{{marrow.title}}</a>
           <br />

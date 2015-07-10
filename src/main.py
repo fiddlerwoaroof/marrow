@@ -28,6 +28,7 @@ limiter.exempt(user.following)
 limiter.exempt(user.follows)
 
 # Blueprints #
+user.login_manager.init_app(app)
 user.get_users(app)
 app.register_blueprint(user.user_blueprint, url_prefix='/user')
 app.register_blueprint(bone.bone_blueprint, url_prefix='/bones')

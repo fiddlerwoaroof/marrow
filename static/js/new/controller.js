@@ -121,6 +121,14 @@ marrowApp.controller('SubscriptionCtrl', function ($controller,$scope,$http,$loc
   $scope.friend = Object.create(null);
   $scope.friend.all = true;
 
+  $scope.upVote = function(boneItem) {
+    BoneService.vote({url: boneItem.url}).$promise.then(function(r) {
+      if (r.success) {
+        boneItem.votes = r.votes;
+      }
+    }).then($scope._update);
+  };
+
   $scope.backAPage = function() {
     var bone = $scope.bone.marrow;
     var lastitem = bone[bone.length-1].posted;

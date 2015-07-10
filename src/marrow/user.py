@@ -3,8 +3,10 @@ import json
 import flask
 from flask import Blueprint, session, redirect, url_for, escape, request, abort, g
 from flask.ext.cors import cross_origin
+from flask.ext.login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 import psycopg2
 
+login_manager = LoginManager()
 from . import database
 
 user_blueprint = Blueprint('user', __name__)
@@ -25,11 +27,30 @@ def _get_users(db=None):
             cur.execute('SELECT name,password,email FROM users')
             for username,password,email in cur.fetchall():
                 users[username] = dict(username=username, password=password, email=email)
+        print 'users!,', users
     except:
         if cleanup: db.rollback()
         raise
     else:
         if cleanup: db.commit()
+
+class User(UserMixin):
+    users = {}
+    @classmethod
+    def get_user(cls, name):
+        print 'get_user!', name
+        if name not in cls.users and name in users:
+            user = users[name]
+            cls.users[name] = cls(user['username'], None, user['email'])
+        return cls.users.get(name)
+
+    def __init__(self, id, passwordhash, email):
+        self.id = id
+        self.passwordhash = passwordhash
+        self.email = email
+        self.users[id] = self
+login_manager.user_loader(User.get_user)
+
 
 #TODO: load this from somewhere
 user_env = {}
@@ -99,13 +120,15 @@ def adduser():
     return json.dumps(result)
 
 @user_blueprint.route('/following')
+@login_required
 def following():
     result = dict(status=False, data=[])
     if 'username' in session:
         username = session['username']
         with database.get_db() as db:
             with db.cursor() as cur:
-                cur.callproc('get_subscriptions', (username,))
+                print 'current_user:', current_user.id
+                cur.callproc('get_subscriptions', (current_user.id,))
                 result['data'] = [x[0] for x in cur.fetchall()]
 
     return json.dumps(result)
@@ -148,7 +171,6 @@ def login():
     username = username.strip().lower()
     password = password.strip()
     user = users.get(username, {})
-    rightPassword = user.get('password',object())
     with database.get_db() as db:
         with db.cursor() as cur:
             cur.callproc('check_password', (username, password))
@@ -161,6 +183,8 @@ def login():
                             cur.callproc('put_ak', (username, ak))
                     result = {'success': True, 'ak': ak}
                 else:
+                    user = User.get_user(username)
+                    login_user(user)
                     session['username'] = username
                     result['status'] = True
             else:
@@ -171,5 +195,6 @@ def login():
 def logout():
     to = request.args.get('to', '/')
     session.pop('username', None)
+    logout_user()
     return redirect(to)
 

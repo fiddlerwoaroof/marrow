@@ -1,6 +1,7 @@
 import flask
 from flask import Blueprint, session, redirect, url_for, escape, request, abort, g
 from flask.ext.cors import cross_origin
+from flask.ext.login import login_required, current_user
 import urllib2
 import lxml.html
 from . import database
@@ -22,6 +23,7 @@ for handler in [urllib2.HTTPSHandler,urllib2.HTTPHandler]:
     urllib2.install_opener(opener)
 
 @bone_blueprint.route('/link/<linkid>', methods=['GET','DELETE'])
+@login_required
 def delete_link(linkid):
     db = database.get_db()
     linkid = int(linkid)
@@ -34,7 +36,7 @@ def delete_link(linkid):
         elif request.method == 'DELETE':
             result = False
             if 'username' in session:
-                cur.execute('SELECT delete_link(%s,%s)', (session['username'],linkid))
+                cur.execute('SELECT delete_link(%s,%s)', (current_user.id,linkid))
                 result = cur.fetchone()[0]
     db.commit()
     return json.dumps(result)
@@ -47,6 +49,28 @@ def clean_url(url):
 
 def get_title(url):
     return config.titlegetter.get_title(url)
+
+@bone_blueprint.route('/vote/up', methods=['POST'])
+@login_required
+def vote_link():
+    obj = request.get_json()
+    url = obj['url']
+    db = database.get_db()
+    result = dict(success=False, votes=None)
+    with db.cursor() as cur:
+        url = url.encode('utf-8')
+        cur.callproc('vote_link', (url, current_user.id, 1))
+        dbresult, = cur.fetchone() # the "," is important!
+    print(dbresult, "<--- dbresult")
+    if dbresult is not None:
+        result['success'] = True
+        result['votes'] = dbresult
+        db.commit()
+    else:
+        db.rollback();
+    print 'done!'
+    print result, '<-- result'
+    return json.dumps(result)
 
 @bone_blueprint.route('/add', methods=['POST'])
 @bone_blueprint.route('/submit', methods=['POST'])
@@ -65,7 +89,8 @@ def submit_link():
             abort(401);
             return
     elif 'username' in session:
-        username = session['username']
+        username = session['username'] # Note that we need to figger out a better way to do the extension
+                                       # auth before we can change this to Flask-Login
 
     if username is not None:
         url, title = obj['url'],obj['title']
@@ -85,9 +110,10 @@ def submit_link():
 
 @bone_blueprint.route('',defaults={'username':None}, methods=['GET'])
 @bone_blueprint.route('/u/<username>', methods=['GET'])
+@login_required
 def data(username):
     if username is None and 'username' in session:
-        username = session['username']
+        username = current_user.id
     sectionTitle = username
 
     result = {'marrow':[], 'sectionTitle': sectionTitle}
@@ -102,11 +128,12 @@ def data(username):
 
 # TODO: rethink variable names here
 @bone_blueprint.route('/unsubscribe', methods=['POST'])
+@login_required
 def unsubscribe():
     data = request.get_json()
     result = False
     if 'username' in session:
-        fro_user = session['username']
+        fro_user = current_user.id
         to_user = data['from']
         db = database.get_db()
         with db.cursor() as cur:
@@ -116,11 +143,12 @@ def unsubscribe():
     return json.dumps(result)
 
 @bone_blueprint.route('/subscribe', methods=['POST'])
+@login_required
 def subscribe():
     data = request.get_json()
     result = False
     if 'username' in session:
-        fro_user = session['username']
+        fro_user = current_user.id
         to_user = data['to']
         db = database.get_db()
         with db.cursor() as cur:
@@ -135,14 +163,17 @@ def subscribe():
 @cross_origin(allow_headers='Content-Type')
 def subscriptions(before, count):
     result = {'marrow':[], 'sectionTitle': 'Subscriptions'}
-    db = database.get_db()
     username = None
-    if 'username' in request.args:
-        username = request.args['username']
-        if 'ak' not in request.args: username = None
-        elif not database.check_ak(db, username, request.args['ak']): username = None
+    db = database.get_db()
+    with db: # Start transaction to make sure that the ak really is deleted.
+             # Otherwise, a malicious attacker could sniff the ak and reuse
+             # it.
+        if 'username' in request.args:
+            username = request.args['username']
+            if 'ak' not in request.args: username = None
+            elif not database.check_ak(db, username, request.args['ak']): username = None
     if username is None and 'username' in session:
-        username = session['username']
+        username = current_user.id
 
     if username is not None:
         with db.cursor() as cur:
@@ -153,19 +184,20 @@ def subscriptions(before, count):
                 args = args + (before,)
             cur.callproc("get_bones", args)
             result['marrow'] = [
-                dict(poster=poster, url=url,title=title,posted=posted.isoformat())
-                    for url,title,posted,poster
+                dict(poster=poster, url=url,title=title,posted=posted.isoformat(), votes=votes)
+                    for url,title,posted,poster,votes
                     in cur.fetchall()
             ]
     return json.dumps(result)
 
 import random
 @bone_blueprint.route('/random')
+@login_required
 def random():
     db = database.get_db()
     with db.cursor() as cur:
         if 'username' in session:
-            exclude = [session['username']]
+            exclude = [current_user.id]
             if 'last' in request.args:
                 exclude.append(request.args['last'])
             cur.execute(

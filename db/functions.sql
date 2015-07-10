@@ -43,10 +43,9 @@ BEGIN
     AS
       SELECT
         DISTINCT ON (links.url)
-        links.url,links.title,links.posted,users1.name
+        links.url,links.title,links.posted,users1.name,total_votes(links.id)
         FROM user_subscriptions
         RIGHT JOIN user_links ON user_subscriptions.to_id=user_links.user_id
-        INNER JOIN links ON link_id=links.id
         INNER JOIN users ON users.id=fro_id
         LEFT JOIN users as users1 ON users1.id=to_id
         WHERE fro_id = subscriber_id
@@ -58,7 +57,7 @@ $$ LANGUAGE plpgsql;
 
 DROP FUNCTION IF EXISTS get_bones(text, int);
 CREATE OR REPLACE FUNCTION get_bones(username text, lim int)
-  RETURNS TABLE(url text, title text, posted timestamp, poster text) AS $$
+  RETURNS TABLE(url text, title text, posted timestamp, poster text, votes bigint) AS $$
 DECLARE
   subscriber_id int;
 BEGIN
@@ -68,7 +67,7 @@ BEGIN
     AS
       SELECT
         DISTINCT ON (links.url)
-        links.url,links.title,links.posted,users1.name
+        links.url,links.title,links.posted,users1.name,total_votes(links.id)
         FROM user_subscriptions
         RIGHT JOIN user_links ON user_subscriptions.to_id=user_links.user_id
         INNER JOIN links ON link_id=links.id
@@ -81,7 +80,7 @@ $$ LANGUAGE plpgsql;
 
 DROP FUNCTION IF EXISTS get_bones(text);
 CREATE OR REPLACE FUNCTION get_bones(username text)
-  RETURNS TABLE(url text, title text, posted timestamp, poster text) AS $$
+  RETURNS TABLE(url text, title text, posted timestamp, poster text, votes bigint) AS $$
 DECLARE
   subscriber_id int;
 BEGIN
@@ -91,7 +90,7 @@ BEGIN
     AS
       SELECT
         DISTINCT ON (links.url)
-        links.url,links.title,links.posted,users1.name
+        links.url,links.title,links.posted,users1.name,total_votes(links.id)
         FROM user_subscriptions
         RIGHT JOIN user_links ON user_subscriptions.to_id=user_links.user_id
         INNER JOIN links ON link_id=links.id
@@ -244,6 +243,71 @@ DECLARE
 BEGIN
   SELECT id,password INTO uid,stored_hash FROM users WHERE users.name = username;
   SELECT stored_hash = crypt(provided_pass, stored_hash) INTO result;
+  RETURN result;
+END
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS vote_link(text);
+DROP FUNCTION IF EXISTS vote_link(text,int);
+DROP FUNCTION IF EXISTS vote_link(text,text,int);
+DROP FUNCTION IF EXISTS vote_link(int,text,int);
+CREATE OR REPLACE FUNCTION vote_link(linkid int, username text, newvote int) RETURNS bigint
+AS $$
+DECLARE
+  uid INT;
+  result BIGINT;
+BEGIN
+  SELECT id INTO uid FROM users WHERE users.name = username;
+  INSERT INTO link_votes(vote, user_id, link_id, voted) VALUES (newvote, uid, linkid, now());
+  RETURN total_votes(linkid);
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION vote_link(linkurl text, username text, newvote int) RETURNS bigint
+AS $$
+DECLARE
+  linkid INT;
+BEGIN
+  SELECT id INTO linkid FROM links WHERE url = linkurl;
+  RETURN vote_link(linkid, username, newvote);
+END
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS total_votes(int);
+DROP FUNCTION IF EXISTS total_votes(text);
+CREATE OR REPLACE FUNCTION total_votes(req_linkid int) RETURNS bigint
+AS $$
+DECLARE
+  result BIGINT;
+  linkid INT;
+BEGIN
+  SELECT id INTO linkid FROM links WHERE links.id = req_linkid;
+  IF linkid IS NOT null THEN
+    WITH
+      ordered_votes AS ( SELECT * FROM link_votes ORDER BY voted DESC),
+      distinct_votes AS (
+        SELECT DISTINCT ON (user_id) vote FROM ordered_votes WHERE link_id=linkid
+      )
+    SELECT sum(distinct_votes.vote) INTO result FROM distinct_votes;
+    IF result IS null THEN
+      SELECT 0 INTO result;
+    END IF;
+  END IF;
+  RETURN result;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION total_votes(linkurl text) RETURNS bigint
+AS $$
+DECLARE
+  linkid INT;
+  result BIGINT;
+BEGIN
+  SELECT id INTO linkid FROM links WHERE links.url = linkurl;
+  SELECT total_votes(linkid) INTO result;
+  IF linkid IS NOT null AND result IS null THEN
+    SELECT 0 INTO result;
+  END IF;
   RETURN result;
 END
 $$ LANGUAGE plpgsql;

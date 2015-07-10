@@ -264,6 +264,34 @@ footer a.facebook-link:hover {
 
 /* @group List Module */
 
+.voting {
+  padding: 0.5em;
+  margin-right: 0.5em;
+  display: inline-block;
+  border-radius: 0.5em;
+  -webkit-transition: 0.3s ease-in background;
+  transition: 0.3s ease-in background;
+}
+.voting:hover {
+  background: #888;
+}
+
+.voting button {
+  cursor: pointer;
+  border: none;
+  text-align: center;
+  padding: 0.25em;
+  background: none;
+  height: 1.5em;
+  width: 1.5em;
+  font-size: 75%;
+}
+
+.voting button:hover {
+  background: #444;
+  color: white;
+}
+
 .linkinfo {
   display: inline-block;
 }
@@ -560,6 +588,6 @@ a.user-settings:hover {
 }
 
 /*
-vim: set foldmethod=marker:
-vim: set foldmarker=@group,@end:
-*/
+ * vim: set foldmethod=marker:
+ * vim: set foldmarker=@group,@end:
+ * */
