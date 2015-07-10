@@ -122,9 +122,11 @@ marrowApp.controller('SubscriptionCtrl', function ($controller,$scope,$http,$loc
   $scope.friend.all = true;
 
   $scope.upVote = function(boneItem) {
-    BoneService.vote({url: boneItem.url}).$promise.then(function(r) {
+    var apiCall = boneItem.myVote === 0? BoneService.vote_up: BoneService.vote_zero;
+    apiCall({url: boneItem.url}).$promise.then(function(r) {
       if (r.success) {
         boneItem.votes = r.votes;
+        boneItem.myVote = r.myVote;
       }
     }).then($scope._update);
   };

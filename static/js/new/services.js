@@ -12,7 +12,9 @@ serviceModule.factory('BoneService', ['$resource',
   function boneFactory($resource){
     return $resource('/api/bones', {}, {
       add: {'method': 'POST', 'url': '/api/bones/add'},
-      vote: {'method': 'POST', 'url': '/api/bones/vote/up'},
+      vote_up: {'method': 'POST', 'url': '/api/bones/vote/up'},
+      vote_zero: {'method': 'POST', 'url': '/api/bones/vote/zero'},
+      vote_down: {'method': 'POST', 'url': '/api/bones/vote/down'},
       user: {'method': 'GET', 'url': '/api/bones/u/:user', params: {user: '@user'}},
       random: {'method': 'GET', 'url': '/api/bones/random'},
       subscriptions: {'method': 'GET', 'url': '/api/bones/subscriptions/:before', 'paramDefaults': {'before': null}, 'params': {before: '@before'}},

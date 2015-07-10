@@ -50,27 +50,43 @@ def clean_url(url):
 def get_title(url):
     return config.titlegetter.get_title(url)
 
-@bone_blueprint.route('/vote/up', methods=['POST'])
-@login_required
-def vote_link():
+def vote_link_common(vote):
     obj = request.get_json()
     url = obj['url']
     db = database.get_db()
-    result = dict(success=False, votes=None)
+    result = dict(success=False, votes=None, myvote=None)
     with db.cursor() as cur:
         url = url.encode('utf-8')
-        cur.callproc('vote_link', (url, current_user.id, 1))
-        dbresult, = cur.fetchone() # the "," is important!
+        cur.callproc('vote_link', (url, current_user.id, vote))
+        dbresult = cur.fetchone()
     print(dbresult, "<--- dbresult")
     if dbresult is not None:
+        myvote, total = dbresult
         result['success'] = True
-        result['votes'] = dbresult
+        result['myVote'] = myvote
+        result['votes'] = total
         db.commit()
     else:
         db.rollback();
     print 'done!'
     print result, '<-- result'
-    return json.dumps(result)
+    return (json.dumps(result), 200, {'Content-Type': 'application/json'})
+
+
+@bone_blueprint.route('/vote/zero', methods=['POST'])
+@login_required
+def vote_link_zero():
+    return vote_link_common(0)
+    
+@bone_blueprint.route('/vote/down', methods=['POST'])
+@login_required
+def vote_link_down():
+    return vote_link_common(-1)
+
+@bone_blueprint.route('/vote/up', methods=['POST'])
+@login_required
+def vote_link_up():
+    return vote_link_common(1)
 
 @bone_blueprint.route('/add', methods=['POST'])
 @bone_blueprint.route('/submit', methods=['POST'])
@@ -184,11 +200,11 @@ def subscriptions(before, count):
                 args = args + (before,)
             cur.callproc("get_bones", args)
             result['marrow'] = [
-                dict(poster=poster, url=url,title=title,posted=posted.isoformat(), votes=votes)
-                    for url,title,posted,poster,votes
+                dict(poster=poster, url=url,title=title,posted=posted.isoformat(), votes=votes, myVote=myvote)
+                    for url,title,posted,poster,votes,myvote
                     in cur.fetchall()
             ]
-    return json.dumps(result)
+    return (json.dumps(result), 200, {'Content-Type': 'application/json'})
 
 import random
 @bone_blueprint.route('/random')

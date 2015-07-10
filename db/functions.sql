@@ -33,7 +33,7 @@ $$ LANGUAGE plpgsql;
 DROP FUNCTION IF EXISTS get_bones(text, timestamp, int);
 DROP FUNCTION IF EXISTS get_bones(text, int, timestamp);
 CREATE OR REPLACE FUNCTION get_bones(username text, lim int, before timestamp)
-  RETURNS TABLE(url text, title text, posted timestamp, poster text) AS $$
+  RETURNS TABLE(url text, title text, posted timestamp, poster text, total_votes bigint, subscriber_vote int) AS $$
 DECLARE
   subscriber_id int;
 BEGIN
@@ -43,7 +43,7 @@ BEGIN
     AS
       SELECT
         DISTINCT ON (links.url)
-        links.url,links.title,links.posted,users1.name,total_votes(links.id)
+        links.url,links.title,links.posted,users1.name,total_votes(links.id),user_vote(subscriber_id,links.id)
         FROM user_subscriptions
         RIGHT JOIN user_links ON user_subscriptions.to_id=user_links.user_id
         INNER JOIN users ON users.id=fro_id
@@ -57,7 +57,7 @@ $$ LANGUAGE plpgsql;
 
 DROP FUNCTION IF EXISTS get_bones(text, int);
 CREATE OR REPLACE FUNCTION get_bones(username text, lim int)
-  RETURNS TABLE(url text, title text, posted timestamp, poster text, votes bigint) AS $$
+  RETURNS TABLE(url text, title text, posted timestamp, poster text, total_votes bigint, subscriber_vote int) AS $$
 DECLARE
   subscriber_id int;
 BEGIN
@@ -67,7 +67,7 @@ BEGIN
     AS
       SELECT
         DISTINCT ON (links.url)
-        links.url,links.title,links.posted,users1.name,total_votes(links.id)
+        links.url,links.title,links.posted,users1.name,total_votes(links.id),user_vote(subscriber_id,links.id)
         FROM user_subscriptions
         RIGHT JOIN user_links ON user_subscriptions.to_id=user_links.user_id
         INNER JOIN links ON link_id=links.id
@@ -80,7 +80,7 @@ $$ LANGUAGE plpgsql;
 
 DROP FUNCTION IF EXISTS get_bones(text);
 CREATE OR REPLACE FUNCTION get_bones(username text)
-  RETURNS TABLE(url text, title text, posted timestamp, poster text, votes bigint) AS $$
+  RETURNS TABLE(url text, title text, posted timestamp, poster text, total_votes bigint, subscriber_vote int) AS $$
 DECLARE
   subscriber_id int;
 BEGIN
@@ -90,7 +90,7 @@ BEGIN
     AS
       SELECT
         DISTINCT ON (links.url)
-        links.url,links.title,links.posted,users1.name,total_votes(links.id)
+        links.url,links.title,links.posted,users1.name,total_votes(links.id),user_vote(subscriber_id,links.id)
         FROM user_subscriptions
         RIGHT JOIN user_links ON user_subscriptions.to_id=user_links.user_id
         INNER JOIN links ON link_id=links.id
@@ -251,19 +251,22 @@ DROP FUNCTION IF EXISTS vote_link(text);
 DROP FUNCTION IF EXISTS vote_link(text,int);
 DROP FUNCTION IF EXISTS vote_link(text,text,int);
 DROP FUNCTION IF EXISTS vote_link(int,text,int);
-CREATE OR REPLACE FUNCTION vote_link(linkid int, username text, newvote int) RETURNS bigint
+DROP TYPE IF EXISTS vote_result_type;
+
+CREATE TYPE vote_result_type AS (myvote int, totalvotes bigint);
+
+CREATE OR REPLACE FUNCTION vote_link(linkid int, username text, newvote int) RETURNS vote_result_type
 AS $$
 DECLARE
   uid INT;
-  result BIGINT;
 BEGIN
   SELECT id INTO uid FROM users WHERE users.name = username;
   INSERT INTO link_votes(vote, user_id, link_id, voted) VALUES (newvote, uid, linkid, now());
-  RETURN total_votes(linkid);
+  RETURN (newvote,total_votes(linkid));
 END
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION vote_link(linkurl text, username text, newvote int) RETURNS bigint
+CREATE OR REPLACE FUNCTION vote_link(linkurl text, username text, newvote int) RETURNS vote_result_type
 AS $$
 DECLARE
   linkid INT;
@@ -284,11 +287,8 @@ BEGIN
   SELECT id INTO linkid FROM links WHERE links.id = req_linkid;
   IF linkid IS NOT null THEN
     WITH
-      ordered_votes AS ( SELECT * FROM link_votes ORDER BY voted DESC),
-      distinct_votes AS (
-        SELECT DISTINCT ON (user_id) vote FROM ordered_votes WHERE link_id=linkid
-      )
-    SELECT sum(distinct_votes.vote) INTO result FROM distinct_votes;
+      ordered AS (SELECT DISTINCT ON (user_id) vote FROM link_votes WHERE link_id=linkid ORDER BY user_id,voted DESC)
+    SELECT sum(vote) INTO result FROM ordered;
     IF result IS null THEN
       SELECT 0 INTO result;
     END IF;
@@ -309,5 +309,30 @@ BEGIN
     SELECT 0 INTO result;
   END IF;
   RETURN result;
+END
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS user_vote(int,int);
+CREATE OR REPLACE FUNCTION user_vote(uid int, linkid int) RETURNS int
+AS $$
+DECLARE
+  result INT;
+BEGIN
+  SELECT vote INTO result FROM link_votes WHERE user_id=uid ORDER BY voted DESC LIMIT 1;
+  IF result IS null THEN
+    SELECT 0 INTO result;
+  END IF;
+  RETURN result;
+END
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION IF EXISTS user_vote(text,int);
+CREATE OR REPLACE FUNCTION user_vote(username text, linkid int) RETURNS int
+AS $$
+DECLARE
+  uid INT;
+BEGIN
+  SELECT id INTO uid FROM users WHERE users.name = username;
+  RETURN user_vote(uid, linkid);
 END
 $$ LANGUAGE plpgsql;
