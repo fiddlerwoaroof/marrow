@@ -273,7 +273,7 @@ footer a.facebook-link:hover {
   transition: 0.3s ease-in background;
 }
 .voting:hover {
-  background: #888;
+  /*background: #888;*/
 }
 
 .voting button {
@@ -287,9 +287,20 @@ footer a.facebook-link:hover {
   font-size: 75%;
 }
 
+.voting button.selected {
+  /*background: #ccc;*/
+  color: red;
+}
+
+.voting button:focus {
+  outline: 0px;
+  box-shadow: none;
+  -webkit-box-shadow: none;
+  background: #eee;
+}
+
 .voting button:hover {
-  background: #444;
-  color: white;
+  background: #ddd;
 }
 
 .linkinfo {

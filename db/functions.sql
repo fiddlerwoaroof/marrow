@@ -318,7 +318,7 @@ AS $$
 DECLARE
   result INT;
 BEGIN
-  SELECT vote INTO result FROM link_votes WHERE user_id=uid ORDER BY voted DESC LIMIT 1;
+  SELECT vote INTO result FROM link_votes WHERE user_id=uid AND link_id=linkid ORDER BY voted DESC LIMIT 1;
   IF result IS null THEN
     SELECT 0 INTO result;
   END IF;

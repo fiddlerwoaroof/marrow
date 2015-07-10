@@ -29,7 +29,7 @@
       <div class="bone-details">
         <span class="voting">
           <span class="score">{{marrow.votes}}</span>
-          <button class="upVote fa fa-plus" ng-click="upVote(marrow)"></button>
+          <button class="upVote vote-button fa fa-plus" ng-class="{selected: marrow.myVote===1}" ng-click="upVote(marrow)"></button>
         </span>
         <span ng-if="marrow.title">
           <a href="{{marrow.url}}" class="list-item">{{marrow.title}}</a>
