@@ -303,6 +303,7 @@ footer a.facebook-link:hover {
   background: #ddd;
 }
 
+.vote-disp { color: #888; }
 .vote-disp::before {
   content: '{';
   font-size: 120%;
