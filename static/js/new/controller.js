@@ -182,6 +182,7 @@ marrowApp.controller('SubscriptionCtrl', function ($controller,$scope,$http,$loc
         $scope.friends.data.push(o.poster);
       }
     });
+    $scope.friends.reps = UserService.reputations($scope.friends.data);
   };
 
   $scope.getendpoint = BoneService.subscriptions;

@@ -1,3 +1,4 @@
+from __future__ import division
 import json
 
 import flask
@@ -190,6 +191,60 @@ def login():
             else:
                 result['message'] = 'Wrong Username or Password'
     return json.dumps(result)
+
+import functools
+def wrap_result(result_key):
+    func = []
+    def _inner(*a, **kw):
+        result = {'success': False, result_key: func[-1](*a, **kw)}
+        result['success'] = result[result_key] is not None
+        return json.dumps(result), 200, {'Content-Type': 'application/json'}
+    def _outer(f):
+        func.append(f)
+        return functools.wraps(f)(_inner)
+    return _outer
+
+# f\left(x\right)\ =\frac{\left(x+1\right)^{\left(1-n\right)}-1}{1-n}\cdot \frac{m\left(1-n\right)}{\left(m+1\right)^{\left(1-n\right)}-1}
+
+
+# This is a magic function to make reputation fall away from
+# a linear increase with the number of votes: the values n and 
+# m are key and are derived from eyeballing an experiment.
+# the adj_factor makes the value of bias at x=m == x
+n = 0.4
+m = 50
+exponent = 1-n
+adj_factor = 1
+def bias(x):
+    result = (x+1)**exponent - 1
+    result /= exponent
+    result *= adj_factor
+    return result
+adj_factor = m / bias(m)
+
+ 
+@user_blueprint.route('/reputation', methods=['POST'],defaults={'username':None})
+@user_blueprint.route('/reputation/<username>')
+@login_required
+@wrap_result('reputation')
+def reputation(username):
+    result = None
+    with database.get_db() as db:
+        with db.cursor() as cur:
+            if username is None:
+                obj = request.get_json(force=True)
+                obj = set(obj)
+                result = {}
+                for n in obj:
+                    cur.callproc('total_user_votes', (n,))
+                    dbresult, = cur.fetchone()
+                    result[n] = int(round(bias(dbresult)))
+                if result == {}: result = None
+            else:
+                cur.callproc('total_user_votes', (username,))
+                dbresult, = cur.fetchone()
+                result =  int(round(bias(dbresult)))
+    return result
 
 @user_blueprint.route('/logout')
 def logout():

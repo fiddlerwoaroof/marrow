@@ -2,7 +2,7 @@ angular.module('marrowApp.directives.userBadge', ['marrowApp.utils'])
 
 .directive('gravatarImage', function() {
   return {
-    scope: { userName: '@', class: '@' },
+    scope: { userName: '@', class: '@'},
     controller: function($scope) {
       $scope.gravUrl = function() {
         var hash = CryptoJS.MD5($scope.userName);
@@ -16,7 +16,7 @@ angular.module('marrowApp.directives.userBadge', ['marrowApp.utils'])
 .directive('userBadge', function() {
   return {
     scope: {
-      poster: '@',
+      poster: '@', rep: '@',
     },
     templateUrl: '/js/directives/user-badge/user-badge.html',
     controller: function($scope) {

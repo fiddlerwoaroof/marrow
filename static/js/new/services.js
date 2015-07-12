@@ -36,6 +36,8 @@ serviceModule.factory('UserService', ['$resource',
       follows: {'method': 'GET', 'url': '/api/user/follows/:user', params: {user: '@user'}},
       following: {'method': 'GET', 'url': '/api/user/following'},
       environment: {'method': 'POST', 'url': '/api/user/environment'},
+      reputation: {'method': 'POST', 'url': '/api/user/reputation/:user', params: {user: '@user'}},
+      reputations: {'method': 'POST', 'url': '/api/user/reputation'},
       changePassword: {'method': 'POST', 'url': '/api/user/change-password'}
     });
   }]

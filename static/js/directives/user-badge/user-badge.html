@@ -1,4 +1,4 @@
 <a class="avatar-image" ng-href="/user/{{ poster }}" title="{{poster}}">
   <gravatar-image class="poster-avatar" user-name="{{poster}}"></gravatar-image>
-  <span class="poster-handle de-emphasize">{{poster}}</span>
+  <span class="poster-handle de-emphasize">{{poster}}{{rep === undefined || rep === null? '' : ' ('+rep+')'}}</span>
 </a>

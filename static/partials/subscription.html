@@ -29,7 +29,8 @@
       <div class="bone-details">
         <span class="voting">
           <span class="score">{{marrow.votes}}</span>
-          <button class="upVote vote-button fa fa-plus" ng-class="{selected: marrow.myVote===1}" ng-click="upVote(marrow)"></button>
+          <button class="upVote vote-button fa fa-plus" ng-class="{selected: marrow.myVote===1}" ng-click="upVote(marrow)"
+                  analytics-on="click" analytics-event="vote" analytics-category="{{marrow.myVote===0? 'up' : 'zero'}}"></button>
         </span>
         <span ng-if="marrow.title">
           <a href="{{marrow.url}}" class="list-item">{{marrow.title}}</a>
@@ -37,7 +38,7 @@
         </span>
         <a href="{{marrow.url}}" ng-class="{'de-emphasize':marrow.title}" >{{marrow.url}}</a>
       </div>
-      <user-badge poster="{{marrow.poster}}"></user-badge>
+      <user-badge poster="{{marrow.poster}}" rep="{{friends.reps.reputation[marrow.poster]}}"></user-badge>
     </li>
   </ul>
   <a ng-click="backAPage()" class="more-link"/>More</a>
