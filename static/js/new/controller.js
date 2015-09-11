@@ -5,7 +5,6 @@ var marrowApp = angular.module('marrowApp', ['ngRoute', 'marrowApp.services', 'm
 marrowApp.config(['$routeProvider',
   function($routeProvider) {
     $routeProvider.
-      when('/login', {templateUrl: 'partials/login.html', controller: 'LoginCtrl'}).
       when('/random', {templateUrl: 'partials/random.html', controller: 'RandomMarrowCtrl'}).
       when('/settings', {templateUrl: 'partials/user-settings.html', controller: 'UserSettingCtrl'}).
       when('/subscriptions', {templateUrl: 'partials/subscription.html', controller: 'SubscriptionCtrl'}).
@@ -16,50 +15,50 @@ marrowApp.config(['$routeProvider',
 
 marrowApp.config(['$locationProvider', function($locationProvider) { $locationProvider.html5Mode(true); }]);
 
-marrowApp.controller('LoginCtrl', function ($scope,$http,$route,$location) {
-  $scope.message = '';
+//marrowApp.controller('LoginCtrl', function ($scope,$http,$route,$location) {
+//  $scope.message = '';
+//
+//  var check_login = function () {
+//    injector = angular.injector(['ng']);
+//    $http = injector.get('$http');
+//    return $http.get("/api/user/check").success(function(is_loggedon) {
+//      if (is_loggedon.result === true) {
+//        angular.element(document.body).addClass('is-logged-on');
+//      }
+//    });
+//  };
+//
+//  check_login().success(
+//    function(is_loggedon) {
+//      if (is_loggedon.result) { $location.url('/');}
+//  });
+//
+//  $scope.newuser = function () {
+//    var username = $scope.username;
+//    var password = $scope.password;
+//    var postObj = {"username":username, "password": password};
+//    $http.post("/api/user/add", postObj)
+//    .success(function(added_user) {
+//      if (added_user.status === true) {$location.url('/');}
+//      else {$scope.message = added_user.message;}
+//    });
+//  };
+//
+//  $scope.login = function () {
+//    var username = $scope.username;
+//    var password = $scope.password;
+//
+//    $http.post("/api/user/login", {"username":username, "password":password})
+//    .success(
+//      function (login_succeeded) {
+//        var el = angular.element(document.querySelector('#login_form'));
+//        if (login_succeeded.status === true) {$location.url('/');}
+//        else {$scope.message = login_succeeded.message;}
+//    });
+//  };
+//});
 
-  var check_login = function () {
-    injector = angular.injector(['ng']);
-    $http = injector.get('$http');
-    return $http.get("/api/user/check").success(function(is_loggedon) {
-      if (is_loggedon.result === true) {
-        angular.element(document.body).addClass('is-logged-on');
-      }
-    });
-  };
-
-  check_login().success(
-    function(is_loggedon) {
-      if (is_loggedon.result) { $location.url('/');}
-  });
-
-  $scope.newuser = function () {
-    var username = $scope.username;
-    var password = $scope.password;
-    var postObj = {"username":username, "password": password};
-    $http.post("/api/user/add", postObj)
-    .success(function(added_user) {
-      if (added_user.status === true) {$location.url('/');}
-      else {$scope.message = added_user.message;}
-    });
-  };
-
-  $scope.login = function () {
-    var username = $scope.username;
-    var password = $scope.password;
-
-    $http.post("/api/user/login", {"username":username, "password":password})
-    .success(
-      function (login_succeeded) {
-        var el = angular.element(document.querySelector('#login_form'));
-        if (login_succeeded.status === true) {$location.url('/');}
-        else {$scope.message = login_succeeded.message;}
-    });
-  };
-});
-
-marrowApp.controller('RootCtrl', function ($scope,$http,$location,$route, SubscribedTo, BoneService, UserService) {
+marrowApp.controller('RootCtrl', function ($scope,$http,$location,$route, SubscribedTo, BoneService, UserService, $window) {
   $scope.url = "";
   $scope.title = "";
 
@@ -97,7 +96,7 @@ marrowApp.controller('RootCtrl', function ($scope,$http,$location,$route, Subscr
     if (is_loggedon.result === true) {
       angular.element(document.body).addClass('is-logged-on');
     } else {
-      $location.url('/login');
+      $window.location.href = '/login.html';
     }
 
     $scope.update();
@@ -243,7 +242,7 @@ marrowApp.controller('UserSettingCtrl', function ($scope,$http,$location) {
   };
 });
 
-marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route) {
+marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route, $window) {
   $scope.subscriptions = function() {
     if ($location.url() !== '/subscriptions') { $location.url('/subscriptions'); }
     else { $route.reload(); }
@@ -256,7 +255,7 @@ marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route) {
 
   $scope.logout = function() {
     $http.get('/api/user/logout').success(function() {
-      $location.url('/login');
+      $window.location.href = '/login.html';
     });
   };
 });
