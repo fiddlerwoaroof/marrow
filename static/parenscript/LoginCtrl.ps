@@ -1,0 +1,37 @@
+(def-module login-module '("ngRoute"))
+(defcontroller login-module "LoginCtrl" ($http)
+  (scope-var tab "login")
+  (scope-var message "")
+
+  (defun check_login ()
+    (ng-ajax get "/api/user/check" nil is_loggedon
+             (if (eql (@ is_loggedon result) T)
+               (chain angular
+                      (element (@ document body))
+                      (add-class "is-logged-on")))
+             nil))
+
+  (chain (check_login)
+         (success
+           (lambda (is_loggedon)
+             (if (@ is_loggedon result)
+               (chain $location (url "/")))
+             nil)))
+
+  (scope-function newuser ()
+    (with-slots (username password) $scope
+      (let* ((postObj (create :username username :password password)))
+        (ng-ajax post "/api/user/add" postObj is_l
+          (if (eql (@ is_l result) T)
+            (chain $location (url "/"))
+            (setf ($s message) (@ added_user message)))
+          nil))))
+
+  (scope-function login ()
+    (with-slots (username password) $scope
+      (ng-ajax post "/api/user/login" (create :username username :password password) login_succeeded
+        (let ((el (select->element "#login_form")))
+          (if (eql (@ login_succeeded status) T)
+            (chain $location (url "/"))
+            (scope-var message (@ login_succeeded message)))
+          nil)))))

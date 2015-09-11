@@ -1,10 +1,31 @@
 <div id="login_form">
-  <form>
-    <div class="message">{{message}}</div>
-    <input type="text" ng-model="username" placeholder="Username" />
-    <input type="password" ng-model="password" placeholder="Password" />
-    <button ng-click="login()">Log In</button>
-    <button ng-click="newuser()">Add User</button>
-  </form>
+  <div class="message" ng-class="{'error': message !== ''}">{{message}}</div>
+  <ul id="tab-choice">
+    <li>
+      <input type="radio" value="login" ng-model="tab" name="choose-tab" id="chLogin" />
+      <label for="chLogin">Login</label>
+    </li>
+    <li>
+      <input type="radio" value="adduser" ng-model="tab" name="choose-tab" id="chAdduser" />
+      <label for="chAdduser">Sign Up</label>
+    </li>
+  </ul>
+  <div class="relCont">
+    <div class="tab" ng-class="{front: tab === 'adduser'}">
+      <form>
+        <input type="text" ng-model="username" placeholder="Username" /><br />
+        <input type="password" ng-model="password" placeholder="Password" /><br />
+        <input type="password" ng-model="confirm" placeholder="Confirm Password" /><br />
+        <button ng-click="newuser()">Sign Up</button>
+      </form>
+    </div>
+    <div class="tab" ng-class="{front: tab === 'login'}">
+      <form ng-submit="login()" method="POST">
+        <input type="text" ng-model="username" placeholder="Username" /><br />
+        <input type="password" ng-model="password" placeholder="Password" /><br />
+        <button type="submit">Log In</button>
+      </form>
+    </div>
+  </div>
 </div>
 
