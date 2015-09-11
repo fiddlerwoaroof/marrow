@@ -5,7 +5,6 @@ var marrowApp = angular.module('marrowApp', ['ngRoute', 'marrowApp.services', 'm
 marrowApp.config(['$routeProvider',
   function($routeProvider) {
     $routeProvider.
-      when('/login', {templateUrl: 'partials/login.html', controller: 'LoginCtrl'}).
       when('/random', {templateUrl: 'partials/random.html', controller: 'RandomMarrowCtrl'}).
       when('/settings', {templateUrl: 'partials/user-settings.html', controller: 'UserSettingCtrl'}).
       when('/subscriptions', {templateUrl: 'partials/subscription.html', controller: 'SubscriptionCtrl'}).
@@ -99,7 +98,7 @@ marrowApp.controller('RootCtrl', function ($scope,$http,$location,$route, Subscr
     if (is_loggedon.result === true) {
       angular.element(document.body).addClass('is-logged-on');
     } else {
-      $location.url('/login');
+      $window.location.href = '/login.html';
     }
 
     $scope.update();
@@ -245,7 +244,7 @@ marrowApp.controller('UserSettingCtrl', function ($scope,$http,$location) {
   };
 });
 
-marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route) {
+marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route, $window) {
   $scope.subscriptions = function() {
     if ($location.url() !== '/subscriptions') { $location.url('/subscriptions'); }
     else { $route.reload(); }
@@ -258,7 +257,7 @@ marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route) {
 
   $scope.logout = function() {
     $http.get('/api/user/logout').success(function() {
-      $location.url('/login');
+      $window.location.href = '/login.html';
     });
   };
 });
