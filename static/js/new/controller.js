@@ -17,11 +17,13 @@ marrowApp.config(['$routeProvider',
 marrowApp.config(['$locationProvider', function($locationProvider) { $locationProvider.html5Mode(true); }]);
 
 marrowApp.controller('LoginCtrl', function ($scope,$http,$route,$location) {
+  $scope.tab = 'login';
+
   $scope.message = '';
 
   var check_login = function () {
-    injector = angular.injector(['ng']);
-    $http = injector.get('$http');
+    var injector = angular.injector(['ng']);
+    var $http = injector.get('$http');
     return $http.get("/api/user/check").success(function(is_loggedon) {
       if (is_loggedon.result === true) {
         angular.element(document.body).addClass('is-logged-on');

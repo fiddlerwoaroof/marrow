@@ -161,8 +161,8 @@ def data(username):
         cur.execute("SELECT url, title, posted, linkid, votes from get_bone(%s);", (username,))
         result['marrow'] = [
                 dict(id=linkid, url=url,title=title,posted=posted.isoformat(),votes=votes)
-                    for url,title,posted,linkid,votes
-                    in cur.fetchall()
+                     for url,title,posted,linkid,votes
+                     in cur.fetchall()
         ]
     return json.dumps(result)
 

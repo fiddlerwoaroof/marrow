@@ -1,0 +1,72 @@
+var rootModule = angular.module('rootModule', ['ngRoute']);
+rootModule.controller('RootCtrl', ['$scope', '$http', '$location', '$route', 'SubscribedTo', 'BoneService', 'UserService', function ($scope, $http, $location, $route, SubscribedTo, BoneService, UserService) {
+    $scope.url = '';
+    $scope.title = '';
+    $scope.toggleSubscribe = function (txt) {
+        var postObj = { 'from' : $scope.bone.sectionTitle, 'to' : $scope.bone.sectionTitle };
+        var promise = null;
+        if ($scope.iFollow.follows) {
+            promise = $http.post('/api/bones/unsubscribe', postObj);
+        } else {
+            promise = $http.post('/api/bones/subscribe', postObj);
+        };
+        return promise.success(function (result) {
+            var result1 = json.parse(result);
+            return result1 ? ($scope.iFollow.follows = !$scope.iFollow.follows) : null;
+        });
+    };
+    $scope.bone = { 'section-title' : '', 'marrow' : [] };
+    $scope.friends = { 'data' : [] };
+    $scope.update = function () {
+        config = { 'params' : $scope.args ? $scope.args : {  } };
+        return $scope.getendpoint(serviceParams, function (data) {
+            $scope.bone.sectionTitle = data.sectionTitle;
+            $scope.bone.marrow = data.marrow;
+            $scope.bone.iFollow = UserService.follows({ 'user' : $scope.bone.sectionTitle });
+            return null;
+        }).$promise.then($scope._update);
+    };
+    UserService.check(function (is_loggedon) {
+        if (is_loggedon.result === true) {
+            angular.element(document.body).addclass('is-logged-on');
+        } else {
+            $location.url('/login');
+        };
+        return scope.update();
+    });
+    return null;
+}]);
+marrowApp.controller('RandomMarrowCtrl', ['$scope', '$controller', '$http', '$location', '$route', 'SubscribedTo', 'BoneService', 'UserService', function ($scope, $controller, $http, $location, $route, SubscribedTo, BoneService, UserService) {
+    $scope._update = function () {
+        return null;
+    };
+    $scope.getendpoint = BoneService.random;
+    angular.extend(this, $controller('RootCtrl', { '$scope' : $scope }));
+    return null;
+}]);
+marrowApp.controller('SubscriptionCtrl', ['$scope', '$controller', '$http', '$location', '$route', 'SubscribedTo', 'BoneService', 'UserService', function ($scope, $controller, $http, $location, $route, SubscribedTo, BoneService, UserService) {
+    $scope.uncheckOthers = function (list) {
+        var _js3 = list.length;
+        for (var _js2 = 0; _js2 < _js3; _js2 += 1) {
+            var n = list[_js2];
+            if (n !== 'all' && list[n] === false) {
+                list[n] = false;
+            };
+        };
+    };
+    $scope.friend = object.create(null);
+    $scope.friend.all = true;
+    $scope.upVote = function (boneItem) {
+        var apiCall = boneItem.myVote === 0 ? BoneService.vote_up : BoneService.vote_down;
+        return apiCall({ 'url' : boneItem.url }).$promise.then(function (r) {
+            if (r.success) {
+                boneItem.votes = r.votes;
+            } else {
+                boneItem.myVote = r.myVote;
+            };
+            return null;
+        }).then($scope._update);
+    };
+    return null;
+}]);
+

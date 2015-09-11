@@ -1,0 +1,71 @@
+(def-module root-module '("ngRoute"))
+(defcontroller root-module "RootCtrl" ($http $location $route -subscribed-to -bone-service -user-service)
+  (scope-var url "")
+  (scope-var title "")
+
+  (scope-function toggle-subscribe (txt) 
+    (let ((post-obj (create :from ($s bone section-title) :to ($s bone section-title)))
+          (promise nil))
+      (if ($s i-follow follows)
+        (setf promise (chain $http (post "/api/bones/unsubscribe" post-obj)))
+        (setf promise (chain $http (post "/api/bones/subscribe" post-obj))))
+      
+      (chain promise (success (lambda (result)
+                                (let ((result (chain JSON (parse result))))
+                                  (if result
+                                    (setf ($s i-follow follows)
+                                          (not ($s i-follow follows))))))))))
+  
+  (setf ($s bone) (create :section-title "" :marrow '()))
+  (setf ($s friends) (create :data '()))
+
+  (scope-function update ()
+    (setf config (create :params (if ($s args)
+                                   ($s args)
+                                   (create))))
+    ((@ ($s (getendpoint
+              service-params
+              (lambda (data)
+                (setf ($s bone section-title) (@ data section-title))
+                (setf ($s bone marrow) (@ data marrow))
+                (setf ($s bone i-follow) (chain -User-Service (follows (create :user ($s bone section-title)))))
+                nil)))
+        $promise then) ($s _update)))
+  
+  (chain -user-service (check
+                       (lambda (is_loggedon)
+                         (if (eql (@ is_loggedon result) t)
+                           (chain angular (element (@ document body))
+                                  (addClass "is-logged-on"))
+                           (chain $location (url "/login")))
+                         
+                         (chain scope (update))))))
+
+(defcontroller marrow-app "RandomMarrowCtrl" ($controller $http $location $route -subscribed-to -bone-service -user-service)
+  (scope-function _update ())
+  (scope-var getendpoint (@ -bone-service random))
+  (chain angular (extend this ($controller "RootCtrl" (create :$scope $scope)))))
+
+(defcontroller marrow-app "SubscriptionCtrl" ($controller $http $location $route -subscribed-to -bone-service -user-service)
+  (scope-function uncheck-others (list)
+    (loop for n in list
+          if (and (/= n "all") (eql (elt list n) F))
+          do (setf (elt list n) F)))
+
+  (scope-var friend (chain Object (create nil)))
+  (setf ($s friend all) t)
+
+  (scope-function up-vote (bone-item)
+    (let ((api-call (if (eql (@ bone-item my-vote) 0)
+                      (@ -bone-service vote_up)
+                      (@ -bone-service vote_down))))
+      (chain (api-call (create :url (@ bone-item url)))
+             $promise
+             (then (lambda (r)
+                     (if (@ r success)
+                       (setf (@ bone-item votes) (@ r votes))
+                       (setf (@ bone-item my-vote) (@ r my-vote)))
+                     nil))
+             (then ($s _update)))))
+  
+  )

@@ -373,14 +373,7 @@ AS $$
 DECLARE
   result bigint;
 BEGIN
-  WITH votes_for as (
-    SELECT
-      DISTINCT ON (link_votes.link_id, link_votes.user_id)
-      vote FROM link_votes INTO result
-      INNER JOIN user_links ON link_votes.link_id=user_links.link_id
-      WHERE user_links.user_id=uid AND link_votes.user_id!=user_links.user_id
-      ORDER BY link_votes.link_id, link_votes.user_id, voted DESC
-  ) SELECT sum(vote) FROM votes_for;
+  SELECT sum(total_votes(link_id)) INTO result FROM user_links WHERE user_id = uid;
   IF result IS NULL AND exists(SELECT 1 FROM users WHERE id=uid LIMIT 1) THEN
     SELECT 0 INTO result;
   END IF;
