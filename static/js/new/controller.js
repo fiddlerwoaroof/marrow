@@ -98,7 +98,7 @@ marrowApp.controller('RootCtrl', function ($scope,$http,$location,$route, Subscr
     if (is_loggedon.result === true) {
       angular.element(document.body).addClass('is-logged-on');
     } else {
-      $window.location.href = '/login.html';
+      //$window.location.href = '/login.html';
     }
 
     $scope.update();
@@ -257,7 +257,7 @@ marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route, $wi
 
   $scope.logout = function() {
     $http.get('/api/user/logout').success(function() {
-      $window.location.href = '/login.html';
+      $window.location.href = '/';
     });
   };
 });
