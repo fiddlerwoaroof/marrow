@@ -8,6 +8,7 @@ from flask.ext.login import LoginManager, UserMixin, login_user, logout_user, lo
 import psycopg2
 
 login_manager = LoginManager()
+login_manager.login_view = "/login.html"
 from . import database
 
 user_blueprint = Blueprint('user', __name__)

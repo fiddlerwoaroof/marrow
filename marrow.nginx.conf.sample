@@ -5,14 +5,14 @@ server {
   access_log /var/log/nginx/marrow.access.log;
   error_log /var/log/nginx/marrow.error.log;
 
-  root /path/to/marrow/static;
-  index index.html;
+  root /home/edwlan/github_repos/marrow/static;
+  index /api;
 
 
   location / {
     # pass unrecognized urls for index.html
     # angularJS will handle the routing of most of these
-    try_files $uri /index.html;
+    try_files $uri /api;
   }
 
   # pass API requests to the python app

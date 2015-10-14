@@ -1,4 +1,4 @@
-var loginModule = angular.module('marrowApp.login', ['ngResource','ngRoute','angulartics', 'angulartics.google.analytics']);
+var loginModule = angular.module('marrowLogin', ['ngResource','ngRoute','angulartics', 'angulartics.google.analytics']);
 
 loginModule.controller('LoginCtrl', function ($scope,$http,$route,$window) {
   $scope.message = '';
