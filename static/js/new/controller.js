@@ -1,3 +1,4 @@
+window.URL = window.URL || window.webkitURL;
 var marrowApp = angular.module('marrowApp', ['ngRoute', 'marrowApp.services', 'marrowApp.directives', 'marrowApp.utils',
                                              'marrowApp.directives.boneList', 'marrowApp.directives.userBadge',
                                              'angulartics', 'angulartics.google.analytics', 'angulartics.piwik']);
@@ -11,7 +12,28 @@ marrowApp.config(['$routeProvider',
       when('/', {templateUrl: 'partials/default.html', controller: 'MarrowCtrl'}).
       when('/user/:user', {template: '<div ng-include="templateUrl">Loading...</div>', controller: 'UserCtrl'});
   }
-]);
+])
+.factory('authHttpResponseInterceptor',['$q','$location', '$window',function($q,$location,$window){
+    return {
+        response: function(response){
+            if (response.status === 401) {
+                console.log("Response 401");
+            }
+            return response || $q.when(response);
+        },
+        responseError: function(rejection) {
+            if (rejection.status === 401) {
+                console.log("Response Error 401",rejection);
+                $window.location.href = '/login.html#' + encodeURIComponent($location.path());
+            }
+            return $q.reject(rejection);
+        }
+    };
+}])
+.config(['$httpProvider',function($httpProvider) {
+    //Http Intercpetor to check auth failures for xhr requests
+    $httpProvider.interceptors.push('authHttpResponseInterceptor');
+}]);
 
 marrowApp.config(['$locationProvider', function($locationProvider) { $locationProvider.html5Mode(true); }]);
 
