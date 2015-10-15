@@ -16,7 +16,7 @@ angular.module('marrowApp.directives.userBadge', ['marrowApp.utils'])
 .directive('userBadge', function() {
   return {
     scope: {
-      poster: '@', rep: '@',
+      poster: '@'
     },
     templateUrl: '/js/directives/user-badge/user-badge.html',
     controller: function($scope) {
