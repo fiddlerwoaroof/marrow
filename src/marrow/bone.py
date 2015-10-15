@@ -148,12 +148,16 @@ def submit_link():
                 db.rollback()
     return json.dumps(result), 200, {'Content-Type':'application/json'}
 
-@bone_blueprint.route('',defaults={'username':None}, methods=['GET'])
-@bone_blueprint.route('/u/<username>', methods=['GET'])
+@bone_blueprint.route('', methods=['GET'])
 @login_required
+def default_data():
+    result = '', 401, {}
+    if 'username' in session:
+        result = data(current_user.id)
+    return result
+
+@bone_blueprint.route('/u/<username>', methods=['GET'])
 def data(username):
-    if username is None and 'username' in session:
-        username = current_user.id
     sectionTitle = username
 
     result = {'marrow':[], 'sectionTitle': sectionTitle}
@@ -200,6 +204,7 @@ def subscribe():
 @bone_blueprint.route('/subscriptions', defaults={'before':None, 'count': None})
 @bone_blueprint.route('/subscriptions/<before>', defaults={'count': None})
 @bone_blueprint.route('/subscriptions/count/<int:count>', defaults={'before': None})
+@login_required
 @cross_origin(allow_headers='Content-Type')
 def subscriptions(before, count):
     result = {'marrow':[], 'sectionTitle': 'Subscriptions'}

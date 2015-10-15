@@ -9,6 +9,9 @@ server {
   index /api;
 
 
+  location = / {
+    rewrite . /api/root;
+  }
   location / {
     # pass unrecognized urls for index.html
     # angularJS will handle the routing of most of these
