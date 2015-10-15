@@ -111,6 +111,7 @@ def adduser():
                 session['username'] = username
                 result['status'] = True
                 _get_users()
+                login_user(User.get_user(username))
             except psycopg2.IntegrityError as e:
                 db.rollback()
                 if e.pgcode == '23505': #username not unique

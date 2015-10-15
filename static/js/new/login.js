@@ -1,5 +1,6 @@
 window.URL = window.URL || window.webkitURL;
-var loginModule = angular.module('marrowLogin', ['ngResource','ngRoute','angulartics', 'angulartics.google.analytics']);
+var loginModule = angular.module('marrowLogin', ['ngResource','ngRoute','angulartics',
+                                 'angulartics.google.analytics', 'angulartics.piwik']);
 
 loginModule.controller('LoginCtrl', function ($scope,$http,$route,$window) {
   $scope.message = '';
@@ -14,10 +15,10 @@ loginModule.controller('LoginCtrl', function ($scope,$http,$route,$window) {
     });
   };
 
-  check_login().success(
-    function(is_loggedon) {
-      if (is_loggedon.result) { $window.location.href = '/';}
-  });
+  //check_login().success(
+  //  function(is_loggedon) {
+  //    if (is_loggedon.result) { $window.location.href = '/';}
+  //});
 
   $scope.newuser = function () {
     var username = $scope.username;

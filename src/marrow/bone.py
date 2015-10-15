@@ -151,9 +151,9 @@ def submit_link():
 @bone_blueprint.route('', methods=['GET'])
 @login_required
 def default_data():
-    result = '', 401, {}
-    if 'username' in session:
-        result = data(current_user.id)
+    print current_user.id
+    print 'username' in session
+    result = data(current_user.id)
     return result
 
 @bone_blueprint.route('/u/<username>', methods=['GET'])
