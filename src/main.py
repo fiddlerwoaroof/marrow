@@ -35,14 +35,20 @@ user.get_users(app)
 app.register_blueprint(user.user_blueprint, url_prefix='/user')
 app.register_blueprint(bone.bone_blueprint, url_prefix='/bones')
 
+@app.route('/root')
+def get_index_page():
+    filebase = 'index'
+    if 'username' not in session:
+        filebase = 'login'
+    filename = os.path.join(config.static_root, '%s.html' % filebase)
+    with open(filename) as f:
+        return f.read()
+
 @app.route('/')
 def index():
-    filename = os.path.join(config.static_root, 'login.html')
-    if 'username' in session: 
-        filename = os.path.join(config.static_root, 'index.html')
+    filename = os.path.join(config.static_root, 'index.html')
     with open(filename) as f:
         dat = f.read()
-        print dat
         return dat
 
 if __name__ == '__main__':
