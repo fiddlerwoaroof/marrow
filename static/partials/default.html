@@ -12,7 +12,7 @@
   </h2>
   <form>
     <input type="text" ng-model="postobj.url" placeholder="http:// . . ."/>
-    <button type="submit" ng-click="addLink(postobj.url)">+</button>
+    <button type="submit" ng-click="addLink(postobj.url)" analytics-on="click" analytics-category="link" analytics-label="add" analytics-event="{{postobj.url}}">+</button>
   </form>
   <ul class="bone-list">
     <li ng-repeat="marrow in bone.marrow"
@@ -22,7 +22,9 @@
         data-posted="{{marrow.posted}}"
         data-title="{{marrow.title}}"
         data-votes="{{marrow.votes}}">
-      <a href class="delete-link" ng-click="delete(marrow.id)" title="Delete Link from List">(-)</a>
+      <a href class="delete-link" ng-click="delete(marrow.id)" title="Delete Link from List"
+        analytics-on="click" analytics-category="link" analytics-label="delete"
+        analytics-event="{{marrow.url}}">(-)</a>
       <div class="marrow">
         <span class="vote-disp">{{marrow.votes}}</span>
         <span ng-if="marrow.title">
