@@ -46,6 +46,7 @@ BEGIN
         links.url,links.title,links.posted,users1.name,total_votes(links.id),user_vote(subscriber_id,links.id)
         FROM user_subscriptions
         RIGHT JOIN user_links ON user_subscriptions.to_id=user_links.user_id
+        INNER JOIN links ON link_id=links.id
         INNER JOIN users ON users.id=fro_id
         LEFT JOIN users as users1 ON users1.id=to_id
         WHERE fro_id = subscriber_id
