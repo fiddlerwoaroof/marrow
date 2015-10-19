@@ -267,9 +267,10 @@ marrowApp.controller('UserSettingCtrl', function ($scope,$http,$location) {
 marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route, $window, UserService) {
   eventSource = new EventSource("/api/user/active");
   $scope.activeUsers = Object.create(null);
+  $scope.activeUsers.users = []
   eventSource.addEventListener("active", function(event) {
-    console.log(event);
-    $scope.activeUsers.users = JSON.parse(event.data).data;
+    var users = $scope.activeUsers.users;
+    Array.prototype.splice.apply(users, [0, users.length].concat(JSON.parse(event.data).data));
   });
 
   $scope.subscriptions = function() {

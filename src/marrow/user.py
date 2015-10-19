@@ -175,8 +175,8 @@ def active():
                     data = get_event()
                     ev = ServerSentEvent(id, "active", data).encode()
                     yield ev
-                    time.sleep(0.1)
                     t0 = t1
+                time.sleep(0.1)
         except GeneratorExit:
             print 'GeneratorExit!'
     response = flask.Response(stream_with_context(poll()), mimetype="text/event-stream")
