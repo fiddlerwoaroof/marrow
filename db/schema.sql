@@ -56,3 +56,14 @@ CREATE TABLE user_ak (
   UNIQUE (user_id, ak),
   PRIMARY KEY (id)
 );
+
+DROP VIEW IF EXISTS recently_active_users;
+CREATE VIEW recently_active_users AS
+WITH recent_users AS (
+  SELECT user_id,name,posted
+  FROM user_links
+  LEFT JOIN links ON link_id = links.id
+  RIGHT JOIN users ON user_id=users.id
+  WHERE posted > now() - interval '1 week'
+  ORDER BY posted desc, user_id)
+SELECT DISTINCT ON (name) user_id,name,posted FROM recent_users;

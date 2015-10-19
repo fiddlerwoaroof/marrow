@@ -260,6 +260,11 @@ footer a.facebook-link:hover {
   margin-top: 10px;
 }
 
+#nav-main h3 {
+  text-align: right;
+  margin-top: 20px;
+}
+
 /* @end */
 
 /* @group List Module */

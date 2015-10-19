@@ -1,4 +1,5 @@
-<a class="avatar-image" ng-href="/user/{{ poster }}" title="{{poster}}">
+<a ng-if="!withoutImage" class="avatar-image" ng-href="/user/{{ poster }}" title="{{poster}}">
   <gravatar-image class="poster-avatar" user-name="{{poster}}"></gravatar-image>
   <span class="poster-handle de-emphasize">{{poster}}</span>
 </a>
+<a ng-if="withoutImage" ng-href="/user/{{poster}}" title="{{poster}}">{{poster}}</a>

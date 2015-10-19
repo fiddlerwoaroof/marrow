@@ -38,7 +38,8 @@ serviceModule.factory('UserService', ['$resource',
       environment: {'method': 'POST', 'url': '/api/user/environment'},
       reputation: {'method': 'POST', 'url': '/api/user/reputation/:user', params: {user: '@user'}},
       reputations: {'method': 'POST', 'url': '/api/user/reputation'},
-      changePassword: {'method': 'POST', 'url': '/api/user/change-password'}
+      changePassword: {'method': 'POST', 'url': '/api/user/change-password'},
+      active: {'method': 'GET', 'url': '/api/user/active'}
     });
   }]
 );
