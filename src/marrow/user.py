@@ -2,7 +2,7 @@ from __future__ import division
 import json
 
 import flask
-from flask import Blueprint, session, redirect, url_for, escape, request, abort, g, current_app, stream_with_context
+from flask import Blueprint, session, redirect, url_for, escape, request, abort, g
 from flask.ext.cors import cross_origin
 from flask.ext.login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 import psycopg2
@@ -91,26 +91,6 @@ def follows(to):
 # def list_users():
 #     return json.dumps([_ for _ in users.keys()])
 
-class ServerSentEvent(object):
-    def __init__(self, id, event, data):
-        self.data = data
-        self.event = event
-        self.id = id
-        self.desc_map = {
-            self.data : "data",
-            self.event : "event",
-            self.id : "id"
-        }
-
-    def encode(self):
-        if not self.data:
-            return ""
-        lines = ["%s: %s" % (v, k) 
-                 for k, v in self.desc_map.iteritems() if k]
-        
-        return "%s\n\n" % "\n".join(lines)
-
-
 @user_blueprint.route('/add', methods=['POST'])
 def adduser():
     db = database.get_db()
@@ -142,46 +122,22 @@ def adduser():
             else: db.commit()
     return json.dumps(result)
 
-import time
 @user_blueprint.route('/active')
 def active():
-    def get_event():
-        result = dict(status=False, data=[])
-        with database.get_db() as db:
-            with db.cursor() as cur:
-                cur.execute("SELECT * FROM recently_active_users ORDER BY posted DESC LIMIT 10")
-                result['status'] = True
-                store = result['data']
-                for id,name,last_posted in cur.fetchall():
-                    store.append(
-                        dict(
-                            id=id,
-                            name=name,
-                            last_posted=last_posted.isoformat()
-                        )
+    result = dict(status=False, data=[])
+    with database.get_db() as db:
+        with db.cursor() as cur:
+            cur.execute("SELECT * FROM recently_active_users")
+            store = result['data']
+            for id,name,last_posted in cur.fetchall():
+                store.append(
+                    dict(
+                        id=id,
+                        name=name,
+                        last_posted=last_posted.isoformat()
                     )
-        return json.dumps(result)
-    def poll():
-        try:
-            id = 1
-            t0 = time.time()
-            data = get_event()
-            ev = ServerSentEvent(id, "active", data).encode()
-            yield ev
-            while True:
-                t1 = time.time()
-                if t1 - t0 > 5:
-                    id += 1
-                    data = get_event()
-                    ev = ServerSentEvent(id, "active", data).encode()
-                    yield ev
-                    t0 = t1
-                time.sleep(0.1)
-        except GeneratorExit:
-            print 'GeneratorExit!'
-    response = flask.Response(stream_with_context(poll()), mimetype="text/event-stream")
-    response.headers['X-Accel-Buffering'] = 'no'
-    return response
+                )
+    return (json.dumps(result), 200, {'Content-Type': 'application/json'})
 
 @user_blueprint.route('/following')
 @login_required
