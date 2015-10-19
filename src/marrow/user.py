@@ -149,7 +149,7 @@ def active():
         result = dict(status=False, data=[])
         with database.get_db() as db:
             with db.cursor() as cur:
-                cur.execute("SELECT * FROM recently_active_users LIMIT 10")
+                cur.execute("SELECT * FROM recently_active_users ORDER BY posted DESC LIMIT 10")
                 result['status'] = True
                 store = result['data']
                 for id,name,last_posted in cur.fetchall():
