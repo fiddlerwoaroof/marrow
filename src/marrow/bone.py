@@ -56,7 +56,7 @@ def clean_url(url):
         netloc, path = path, netloc
     return urlparse.urlunparse((scheme, netloc, path, params, query, fragment))
 
-def get_title(url):
+def get_siteinfo(url):
     return config.titlegetter.get_title(url)
 
 @bone_blueprint.route('/vote/total')
@@ -135,7 +135,8 @@ def submit_link():
     if username is not None:
         url, title = obj['url'],obj['title']
         url = clean_url(url)
-        title = get_title(url)
+        title, url = get_siteinfo(url) # this makes sure that the url is the site's preferred URL
+                                       #  TODO: this might need sanity checks . . . like make sure same site?
         with db.cursor() as cur:
             cur.callproc('put_link', (username, url, title))
             ## This returns (link_id, user_id)

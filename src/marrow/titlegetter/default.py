@@ -1,7 +1,8 @@
-import lxml.html
-import urllib2
-import urlparse
 import re
+import urlparse
+
+import lxml.html
+import requests
 
 from textblob import TextBlob
 from textblob_aptagger import PerceptronTagger
@@ -14,19 +15,22 @@ class DefaultTitleGetter(object):
     url_cleaner = re.compile('[+\-_]')
 
     def get_title(self, url):
+        s = requests.session()
         scheme, netloc, path, params, query, fragment = urlparse.urlparse(url, 'http')
-        data = urllib2.urlopen(url)
-        content_type = data.headers['content-type'].lower()
-        charset = 'utf-8'
-        if 'charset' in content_type:
-            charset = content_type.partition('charset=')[-1]
-        data = data.read()
-        data = data.decode(charset)
-        etree = lxml.html.fromstring(data)
-        titleElems = etree.xpath('//title')
-        title = url
-        if titleElems != []:
-            title = titleElems[0].text
+        data = s.get(url)
+        etree = lxml.html.fromstring(data.content.decode(data.encoding))
+
+        canonicalLink = etree.xpath('//link[@rel="canonical"]/@href')
+        if canonicalLink != []:
+            canonicalLink = canonicalLink[0]
+            data = s.get(canonicalLink)
+            etree = lxml.html.fromstring(data.content.decode(data.encoding))
+        else:
+            canonicalLink = url
+
+        title = etree.xpath('//title/text()')
+        if title != []:
+            title = title[0]
         elif path:
             # hacky way to make a title
             path = urlparse.unquote(path)
@@ -37,4 +41,4 @@ class DefaultTitleGetter(object):
             title = map(titlecase, path)
             title = u' \u2014 '.join(title)
             title = u' \u2014 '.join([title, netloc])
-        return title
+        return title, canonicalLink
