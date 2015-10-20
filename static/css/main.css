@@ -418,6 +418,19 @@ div.marrow {
   font-size: 80%;
   color: #aaa;
 }
+a.add-link {
+  color: green;
+  display: inline-block;
+  vertical-align: top;
+  position: relative;
+  top: 0.2em;
+  /*position: absolute;*/
+  /*margin-left: -1em;*/
+}
+a.add-link:hover {
+  text-decoration: none;
+  color: olive;
+}
 a.delete-link {
   color: red;
   display: inline-block;
