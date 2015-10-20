@@ -30,12 +30,17 @@
         <span class="voting">
           <span class="score">{{marrow.votes}}</span>
           <button class="upVote vote-button fa fa-plus" ng-class="{selected: marrow.myVote===1}" ng-click="upVote(marrow)"
-                  analytics-on="click" analytics-event="vote" analytics-category="{{marrow.myVote===0? 'up' : 'zero'}}"></button>
+                  analytics-on="click" analytics-event="vote" analytics-category="{{marrow.myVote===0? 'up' : 'zero'}}">
+          </button>
         </span>
         <span ng-if="marrow.title">
           <a href="{{marrow.url}}" class="list-item">{{marrow.title}}</a>
           <br />
         </span>
+        <a class="add-link" ng-click="reshare(marrow)" title="Reshare Link"
+           analytics-on="click" analytics-category="link" analytics-label="reshare"
+           analytics-event="{{marrow.url}}">{{!marrow.shared? 'Reshare': '&check;'}}</a>
+        &mdash;
         <a href="{{marrow.url}}" ng-class="{'de-emphasize':marrow.title}" >{{marrow.url}}</a>
       </div>
       <user-badge poster="{{marrow.poster}}"></user-badge>

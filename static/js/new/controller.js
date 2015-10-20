@@ -84,6 +84,15 @@ marrowApp.controller('RootCtrl', function ($scope,$http,$location,$route, Subscr
   $scope.url = "";
   $scope.title = "";
 
+  $scope.reshare = function (marrow) {
+    if (!marrow.shared ) {
+      $http.post('/api/bones/link/'+marrow.id).success(function(shared) {
+        marrow.shared = true;
+        if (shared === true) { $scope.update(); }
+      });
+    };
+  };
+
   $scope.toggleSubscribe = function (txt) {
     var postObj = {"from":$scope.bone.sectionTitle, "to":$scope.bone.sectionTitle};
     var promise = null;

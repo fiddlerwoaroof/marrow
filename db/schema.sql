@@ -66,4 +66,4 @@ WITH recent_users AS (
   RIGHT JOIN users ON user_id=users.id
   WHERE posted > now() - interval '1 week'
   ORDER BY posted desc, user_id)
-SELECT DISTINCT ON (name) user_id,name,posted FROM recent_users;
+SELECT DISTINCT ON (user_id) user_id,name,posted FROM recent_users;
