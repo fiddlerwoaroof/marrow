@@ -2,8 +2,8 @@
   <h2 class="section-title">
     {{bone.sectionTitle}} ({{filtered.length}} items)
   </h2>
-  <form>
-    <ul class="subscription-list">
+  <form class="filter-form">
+    <ul ng-class="{'subscription-list': true, 'opened': opened}">
       <li class="sub-filter">
         <input id="sub-all" type="checkbox" ng-model="friend.all" ng-click="uncheckOthers(friend)"></input>
         <label for="sub-all">[All]</label>
@@ -15,6 +15,10 @@
           <span class="wide">{{name}}</span>
         </label>
       </li>
+      <div class="list-control" ng-click="opened = ! opened">
+        <span ng-if="opened">Hide . . .</span>
+        <span ng-if="!opened">Filter . . .</span>
+      </div>
     </ul>
   </form>
   <ul class="bone-list">

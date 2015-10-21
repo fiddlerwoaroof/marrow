@@ -48,6 +48,10 @@ html {
 
 * {
   box-sizing: border-box;
+  -webkit-font-feature-settings: 'kern' 1, 'liga' 1;
+  -moz-font-feature-settings: 'kern' 1;
+  -o-font-feature-settings: 'kern' 1;
+  text-rendering: geometricPrecision;
 }
 
 body {
@@ -115,6 +119,8 @@ img {
 
 .identicon {
   border-radius: 50%;
+  /*border: thin solid #888;*/
+  box-shadow: 0em 0em 0.1em black;
   vertical-align: middle;
 }
 
@@ -134,9 +140,41 @@ img {
   width: 9em;
 }
 
+.filter-form {
+  padding-bottom: 0px;
+}
+
 ul.subscription-list {
   text-align: center;
-  /*background: #eee;*/
+  position: relative;
+  background: #888;
+  /*text-shadow: 0em 0em 0.1em black;*/
+  /*color: white;                    */
+  border: thin solid black;
+  padding: 0.75em 1.5em;
+  max-height: 1.5em;
+  overflow: hidden;
+  transition: max-height 1.5s ease, padding 1.5s ease;
+}
+
+ul.subscription-list.opened {
+  max-height: 12em;
+  padding-bottom: 2.5em;
+}
+
+ul.subscription-list > .list-control {
+  position: absolute;
+  width: 100%;
+  bottom: 0px;
+  left: 0px;
+  height: 1.5em;
+  background: #888;
+  color: white;
+  cursor: pointer;
+}
+ul.subscription-list > .list-control:hover {
+  background-color: #ccc;
+  /*color: black;*/
 }
 
 ul.subscription-list::after {
