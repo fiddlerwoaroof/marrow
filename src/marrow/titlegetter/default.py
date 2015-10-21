@@ -13,11 +13,12 @@ def titlecase(line):
 
 class DefaultTitleGetter(object):
     url_cleaner = re.compile('[+\-_]')
+    user_agent = {'User-Agent': 'Marrow Title Getter: https://joinmarrow.com'}
 
     def get_title(self, url):
         s = requests.session()
         scheme, netloc, path, params, query, fragment = urlparse.urlparse(url, 'http')
-        data = s.get(url)
+        data = s.get(url, headers=self.user_agent)
         etree = lxml.html.fromstring(data.content.decode(data.encoding))
 
         canonicalLink = etree.xpath('//link[@rel="canonical"]/@href')
