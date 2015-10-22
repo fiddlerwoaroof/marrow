@@ -24,7 +24,7 @@ class DefaultTitleGetter(object):
         canonicalLink = etree.xpath('//link[@rel="canonical"]/@href')
         if canonicalLink != []:
             canonicalLink = canonicalLink[0]
-            data = s.get(canonicalLink)
+            data = s.get(canonicalLink, headers=self.user_agent)
             etree = lxml.html.fromstring(data.content.decode(data.encoding))
         else:
             canonicalLink = url
