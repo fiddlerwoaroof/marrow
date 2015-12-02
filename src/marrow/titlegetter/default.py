@@ -22,10 +22,26 @@ class DefaultTitleGetter(object):
         etree = lxml.html.fromstring(data.content.decode(data.encoding))
 
         canonicalLink = etree.xpath('//link[@rel="canonical"]/@href')
+        oetree = etree
         if canonicalLink != []:
             canonicalLink = canonicalLink[0]
-            data = s.get(canonicalLink, headers=self.user_agent)
-            etree = lxml.html.fromstring(data.content.decode(data.encoding))
+            try:
+                data = s.get(canonicalLink, headers=self.user_agent)
+                etree = lxml.html.fromstring(data.content.decode(data.encoding))
+            except requests.exceptions.MissingSchema:
+                nscheme, nnetloc, npath, nparams, nquery, nfragment = urlparse.urlparse(canonicalLink)
+                if nscheme == '':
+                    nscheme = scheme
+                if nnetloc == '':
+                    nnetloc = netloc
+                canonicalLink = urlparse.urlunparse((nscheme, nnetloc, npath, nparams, nquery, nfragment))
+                try:
+                    data = s.get(canonicalLink, headers=self.user_agent)
+                    etree = lxml.html.fromstring(data.content.decode(data.encoding))
+                except IOError:
+                    etree = oetree
+            except IOError:
+                etree = oetree
         else:
             canonicalLink = url
 
