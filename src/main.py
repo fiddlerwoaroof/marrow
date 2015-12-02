@@ -19,9 +19,11 @@ except ImportError:
         secret_key = base64.b64encode(os.urandom(24))
         debug = False
         static_root =  os.path.join(os.path.dirname(__file__), os.path.pardir, 'static')
+        server_name = "localhost"
 
 app.secret_key = config.secret_key
 app.debug = config.debug
+app.config["SERVER_NAME"] = config.server_name
 
 limiter = Limiter(app)
 limiter.limit("60/hour 3/second", key_func=lambda: request.host)(user.user_blueprint)

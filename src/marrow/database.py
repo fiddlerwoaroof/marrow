@@ -1,21 +1,24 @@
 from flask import g
 import psycopg2
+
 try: from marrow_config import config
 except ImportError:
     class config:
-        db = "marrow"
-        user = "marrow"
-        password = "marrowpass"
-        host = "pgsqlserver.elangley.org"
+        class db:
+            db = "marrow"
+            user = "marrow"
+            password = "marrowpass"
+            host = "pgsqlserver.elangley.org"
 
 def get_db(close=True):
     db = getattr(g, '_database', None)
+    _config = config.db
     if db is None:
         db = g._database = [psycopg2.connect(
-          database=config.db,
-          user=config.user,
-          password=config.password,
-          host=config.host
+          database=_config.db,
+          user=_config.user,
+          password=_config.password,
+          host=_config.host
         ),close];
     return db[0]
 
