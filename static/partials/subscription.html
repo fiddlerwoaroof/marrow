@@ -2,8 +2,8 @@
   <h2 class="section-title">
     {{bone.sectionTitle}} ({{filtered.length}} items)
   </h2>
-  <form>
-    <ul class="subscription-list">
+  <form class="filter-form">
+    <ul ng-class="{'subscription-list': true, 'opened': opened}">
       <li class="sub-filter">
         <input id="sub-all" type="checkbox" ng-model="friend.all" ng-click="uncheckOthers(friend)"></input>
         <label for="sub-all">[All]</label>
@@ -15,6 +15,10 @@
           <span class="wide">{{name}}</span>
         </label>
       </li>
+      <div class="list-control" ng-click="opened = ! opened">
+        <span ng-if="opened">Hide . . .</span>
+        <span ng-if="!opened">Filter . . .</span>
+      </div>
     </ul>
   </form>
   <ul class="bone-list">
@@ -30,15 +34,20 @@
         <span class="voting">
           <span class="score">{{marrow.votes}}</span>
           <button class="upVote vote-button fa fa-plus" ng-class="{selected: marrow.myVote===1}" ng-click="upVote(marrow)"
-                  analytics-on="click" analytics-event="vote" analytics-category="{{marrow.myVote===0? 'up' : 'zero'}}"></button>
+                  analytics-on="click" analytics-event="vote" analytics-category="{{marrow.myVote===0? 'up' : 'zero'}}">
+          </button>
         </span>
         <span ng-if="marrow.title">
           <a href="{{marrow.url}}" class="list-item">{{marrow.title}}</a>
           <br />
         </span>
+        <a class="add-link" ng-click="reshare(marrow)" title="Reshare Link"
+           analytics-on="click" analytics-category="link" analytics-label="reshare"
+           analytics-event="{{marrow.url}}">{{!marrow.shared? 'Reshare': '&check;'}}</a>
+        &mdash;
         <a href="{{marrow.url}}" ng-class="{'de-emphasize':marrow.title}" >{{marrow.url}}</a>
       </div>
-      <user-badge poster="{{marrow.poster}}" rep="{{friends.reps.reputation[marrow.poster]}}"></user-badge>
+      <user-badge poster="{{marrow.poster}}"></user-badge>
     </li>
   </ul>
   <a ng-click="backAPage()" class="more-link"/>More</a>

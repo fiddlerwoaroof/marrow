@@ -24,7 +24,7 @@ marrowApp.config(['$routeProvider',
         responseError: function(rejection) {
             if (rejection.status === 401) {
                 console.log("Response Error 401",rejection);
-                $window.location.href = '/login.html';
+                $window.location.href = '/login.html#' + encodeURIComponent($location.path());
             }
             return $q.reject(rejection);
         }
@@ -38,23 +38,41 @@ marrowApp.config(['$routeProvider',
 marrowApp.config(['$locationProvider', function($locationProvider) { $locationProvider.html5Mode(true); }]);
 
 //marrowApp.controller('LoginCtrl', function ($scope,$http,$route,$location) {
+<<<<<<< HEAD
+//  $scope.tab = 'login';
+
+//  $scope.message = '';
+
+//  var check_login = function () {
+//    var injector = angular.injector(['ng']);
+//    var $http = injector.get('$http');
+=======
 //  $scope.message = '';
 //
 //  var check_login = function () {
 //    injector = angular.injector(['ng']);
 //    $http = injector.get('$http');
+>>>>>>> Split login into its own html file
 //    return $http.get("/api/user/check").success(function(is_loggedon) {
 //      if (is_loggedon.result === true) {
 //        angular.element(document.body).addClass('is-logged-on');
 //      }
 //    });
 //  };
+<<<<<<< HEAD
+
+=======
 //
+>>>>>>> Split login into its own html file
 //  check_login().success(
 //    function(is_loggedon) {
 //      if (is_loggedon.result) { $location.url('/');}
 //  });
+<<<<<<< HEAD
+
+=======
 //
+>>>>>>> Split login into its own html file
 //  $scope.newuser = function () {
 //    var username = $scope.username;
 //    var password = $scope.password;
@@ -65,11 +83,19 @@ marrowApp.config(['$locationProvider', function($locationProvider) { $locationPr
 //      else {$scope.message = added_user.message;}
 //    });
 //  };
+<<<<<<< HEAD
+
+//  $scope.login = function () {
+//    var username = $scope.username;
+//    var password = $scope.password;
+
+=======
 //
 //  $scope.login = function () {
 //    var username = $scope.username;
 //    var password = $scope.password;
 //
+>>>>>>> Split login into its own html file
 //    $http.post("/api/user/login", {"username":username, "password":password})
 //    .success(
 //      function (login_succeeded) {
@@ -80,18 +106,13 @@ marrowApp.config(['$locationProvider', function($locationProvider) { $locationPr
 //  };
 //});
 
+<<<<<<< HEAD
+marrowApp.controller('RootCtrl', function ($scope,$http,$location,$route, SubscribedTo, BoneService, UserService) {
+=======
 marrowApp.controller('RootCtrl', function ($scope,$http,$location,$route, SubscribedTo, BoneService, UserService, $window) {
+>>>>>>> Split login into its own html file
   $scope.url = "";
   $scope.title = "";
-
-  $scope.reshare = function (marrow) {
-    if (!marrow.shared ) {
-      $http.post('/api/bones/link/'+marrow.id).success(function(shared) {
-        marrow.shared = true;
-        if (shared === true) { $scope.update(); }
-      });
-    };
-  };
 
   $scope.toggleSubscribe = function (txt) {
     var postObj = {"from":$scope.bone.sectionTitle, "to":$scope.bone.sectionTitle};
@@ -127,7 +148,11 @@ marrowApp.controller('RootCtrl', function ($scope,$http,$location,$route, Subscr
     if (is_loggedon.result === true) {
       angular.element(document.body).addClass('is-logged-on');
     } else {
+<<<<<<< HEAD
       //$window.location.href = '/login.html';
+=======
+      $window.location.href = '/login.html';
+>>>>>>> Split login into its own html file
     }
 
     $scope.update();
@@ -273,16 +298,7 @@ marrowApp.controller('UserSettingCtrl', function ($scope,$http,$location) {
   };
 });
 
-marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route, $window, UserService) {
-  //eventSource = new EventSource("/api/user/active");
-  $scope.activeUsers = UserService.active();
-  //$scope.activeUsers = Object.create(null);
-  //$scope.activeUsers.users = []
-  //eventSource.addEventListener("active", function(event) {
-  //  var users = $scope.activeUsers.users;
-  //  Array.prototype.splice.apply(users, [0, users.length].concat(JSON.parse(event.data).data));
-  //});
-
+marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route, $window) {
   $scope.subscriptions = function() {
     if ($location.url() !== '/subscriptions') { $location.url('/subscriptions'); }
     else { $route.reload(); }
@@ -295,7 +311,11 @@ marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route, $wi
 
   $scope.logout = function() {
     $http.get('/api/user/logout').success(function() {
+<<<<<<< HEAD
       $window.location.href = '/';
+=======
+      $window.location.href = '/login.html';
+>>>>>>> Split login into its own html file
     });
   };
 });

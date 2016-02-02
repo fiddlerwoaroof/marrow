@@ -1,4 +1,5 @@
 import urllib2
+import requests
 import urlparse
 
 from .utils import memoize
@@ -34,11 +35,10 @@ class TitleGetter(object):
                 handler = self.getters[site]
                 break
 
-        title = None
         try:
-            title = handler.get_title(url)
-        except urllib2.HTTPError:
-            title = self.default_handler.get_title(url)
+            title, canonicalUrl = handler.get_title(url)
+        except requests.exceptions.RequestException:
+            title, canonicalUrl = self.default_handler.get_title(url)
 
-        return title.encode('utf-8')
+        return title.encode('utf-8'), canonicalUrl
 

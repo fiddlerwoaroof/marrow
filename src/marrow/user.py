@@ -111,6 +111,7 @@ def adduser():
                 session['username'] = username
                 result['status'] = True
                 _get_users()
+                login_user(User.get_user(username))
             except psycopg2.IntegrityError as e:
                 db.rollback()
                 if e.pgcode == '23505': #username not unique
@@ -120,6 +121,23 @@ def adduser():
                 else: raise
             else: db.commit()
     return json.dumps(result)
+
+@user_blueprint.route('/active')
+def active():
+    result = dict(status=False, data=[])
+    with database.get_db() as db:
+        with db.cursor() as cur:
+            cur.execute("SELECT * FROM recently_active_users ORDER BY posted DESC LIMIT 10")
+            store = result['data']
+            for id,name,last_posted in cur.fetchall():
+                store.append(
+                    dict(
+                        id=id,
+                        name=name,
+                        last_posted=last_posted.isoformat()
+                    )
+                )
+    return (json.dumps(result), 200, {'Content-Type': 'application/json'})
 
 @user_blueprint.route('/following')
 @login_required
@@ -142,7 +160,7 @@ import os, base64
 def gen_ak(db):
     return ak
 
-@user_blueprint.route('/<user>/env', methods=['POST'])
+@user_blueprint.route('/env/<user>', methods=['POST'])
 def getenv(user): pass
 
 @user_blueprint.route('/change-password', methods=['POST'])

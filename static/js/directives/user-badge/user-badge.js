@@ -16,10 +16,12 @@ angular.module('marrowApp.directives.userBadge', ['marrowApp.utils'])
 .directive('userBadge', function() {
   return {
     scope: {
-      poster: '@', rep: '@',
+      poster: '@',
+      noImage: '@'
     },
     templateUrl: '/js/directives/user-badge/user-badge.html',
-    controller: function($scope) {
+    controller: function($scope,$attrs) {
+      $scope.withoutImage = $attrs.hasOwnProperty('noImage');
       $scope.gravURL = function(uid) {
         var hash = CryptoJS.MD5(uid);
         return '//gravatar.com/avatar/'+hash+'?d=identicon&s=24';

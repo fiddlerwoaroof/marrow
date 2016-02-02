@@ -1,5 +1,6 @@
 import flask
 from flask import Blueprint, session, redirect, url_for, escape, request, abort, g
+import flask_login;
 from flask.ext.cors import cross_origin
 from flask.ext.login import login_required, current_user
 import urllib2
@@ -31,7 +32,7 @@ def as_json(f):
         return res
     return _inner
         
-@bone_blueprint.route('/link/<linkid>', methods=['GET','DELETE'])
+@bone_blueprint.route('/link/<linkid>', methods=['GET','POST','DELETE'])
 @login_required
 def delete_link(linkid):
     db = database.get_db()
@@ -42,6 +43,11 @@ def delete_link(linkid):
             cur.execute('SELECT id,url,title,posted FROM links WHERE id=%s', (linkid,))
             nid,url,title,posted = cur.fetchone()
             result = dict(id=nid,url=url,title=title,posted=posted.isoformat())
+        elif request.method == 'POST':
+            result = False
+            if 'username' in session:
+                cur.execute('SELECT subscribe_link(%s,%s)', (current_user.id,linkid))
+                result = cur.fetchone()[0]
         elif request.method == 'DELETE':
             result = False
             if 'username' in session:
@@ -56,7 +62,7 @@ def clean_url(url):
         netloc, path = path, netloc
     return urlparse.urlunparse((scheme, netloc, path, params, query, fragment))
 
-def get_title(url):
+def get_siteinfo(url):
     return config.titlegetter.get_title(url)
 
 @bone_blueprint.route('/vote/total')
@@ -135,7 +141,8 @@ def submit_link():
     if username is not None:
         url, title = obj['url'],obj['title']
         url = clean_url(url)
-        title = get_title(url)
+        title, url = get_siteinfo(url) # this makes sure that the url is the site's preferred URL
+                                       #  TODO: this might need sanity checks . . . like make sure same site?
         with db.cursor() as cur:
             cur.callproc('put_link', (username, url, title))
             ## This returns (link_id, user_id)
@@ -151,9 +158,9 @@ def submit_link():
 @bone_blueprint.route('', methods=['GET'])
 @login_required
 def default_data():
-    result = '', 401, {}
-    if 'username' in session:
-        result = data(current_user.id)
+    print current_user.id
+    print 'username' in session
+    result = data(current_user.id)
     return result
 
 @bone_blueprint.route('/u/<username>', methods=['GET'])
@@ -162,10 +169,14 @@ def data(username):
 
     result = {'marrow':[], 'sectionTitle': sectionTitle}
     with database.get_db().cursor() as cur:
-        cur.execute("SELECT url, title, posted, linkid, votes from get_bone(%s);", (username,))
+        cur_username = 'anonymous'
+        if current_user.is_authenticated:
+            cur_username = current_user.id
+        cur.execute("SELECT url, title, posted, linkid, votes, has_user_shared(%s, url) from get_bone(%s);",
+                    (cur_username, username,))
         result['marrow'] = [
-                dict(id=linkid, url=url,title=title,posted=posted.isoformat(),votes=votes)
-                     for url,title,posted,linkid,votes
+                dict(id=linkid, url=url,title=title,posted=posted.isoformat(),votes=votes,shared=shared)
+                     for url,title,posted,linkid,votes,shared
                      in cur.fetchall()
         ]
     return json.dumps(result)
@@ -229,8 +240,9 @@ def subscriptions(before, count):
                 args = args + (before,)
             cur.callproc("get_bones", args)
             result['marrow'] = [
-                dict(poster=poster, url=url,title=title,posted=posted.isoformat(), votes=votes, myVote=myvote)
-                    for url,title,posted,poster,votes,myvote
+                dict(id=id,poster=poster, url=url,title=title,posted=posted.isoformat(), votes=votes,
+                     myVote=myvote, shared=shared)
+                    for id,url,title,posted,poster,votes,myvote,shared
                     in cur.fetchall()
             ]
     return (json.dumps(result), 200, {'Content-Type': 'application/json'})

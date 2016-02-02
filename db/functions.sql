@@ -14,6 +14,24 @@ END
 $$ LANGUAGE plpgsql;
 
 
+DROP FUNCTION IF EXISTS subscribe_link(text,int);
+CREATE OR REPLACE FUNCTION subscribe_link(username text, linkid int)
+  RETURNS bool AS $$
+DECLARE
+  uid int;
+  result bool;
+  n_title text;
+  n_url text;
+BEGIN
+  SELECT INTO result NOT exists(SELECT * FROM user_links WHERE user_id=uid AND link_id=linkid);
+  IF result THEN
+    SELECT title,url INTO n_title,n_url FROM links WHERE links.id=linkid;
+    PERFORM put_link(username, n_url, n_title);
+  END IF;
+  RETURN result;
+END
+$$ LANGUAGE plpgsql;
+
 DROP FUNCTION IF EXISTS delete_link(text,int);
 CREATE OR REPLACE FUNCTION delete_link(username text, linkid int)
   RETURNS bool AS $$
@@ -30,10 +48,25 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+DROP FUNCTION IF EXIST has_user_shared(text, text);
+CREATE OR REPLACE FUNCTION has_user_shared(username text, linkurl text) RETURNS bool AS $$
+DECLARE
+  result bool;
+BEGIN
+  SELECT INTO result EXISTS(
+    SELECT 1 FROM user_links ul
+    LEFT JOIN users u ON user_id=u.id
+    LEFT JOIN links l ON link_id=l.id
+    WHERE linkurl=l.url AND username=u.name
+  );
+  RETURN result;
+END
+$$ LANGUAGE plpgsql;
+
 DROP FUNCTION IF EXISTS get_bones(text, timestamp, int);
 DROP FUNCTION IF EXISTS get_bones(text, int, timestamp);
 CREATE OR REPLACE FUNCTION get_bones(username text, lim int, before timestamp)
-  RETURNS TABLE(url text, title text, posted timestamp, poster text, total_votes bigint, subscriber_vote int) AS $$
+  RETURNS TABLE(linkid int, url text, title text, posted timestamp, poster text, total_votes bigint, subscriber_vote int, shared bool) AS $$
 DECLARE
   subscriber_id int;
 BEGIN
@@ -43,9 +76,12 @@ BEGIN
     AS
       SELECT
         DISTINCT ON (links.url)
-        links.url,links.title,links.posted,users1.name,total_votes(links.id),user_vote(subscriber_id,links.id)
+        links.id,links.url,links.title,links.posted,users1.name,
+        total_votes(links.id),user_vote(subscriber_id,links.id),
+        has_user_shared(username, links.url)
         FROM user_subscriptions
         RIGHT JOIN user_links ON user_subscriptions.to_id=user_links.user_id
+        INNER JOIN links ON link_id=links.id
         INNER JOIN users ON users.id=fro_id
         LEFT JOIN users as users1 ON users1.id=to_id
         WHERE fro_id = subscriber_id
@@ -57,7 +93,8 @@ $$ LANGUAGE plpgsql;
 
 DROP FUNCTION IF EXISTS get_bones(text, int);
 CREATE OR REPLACE FUNCTION get_bones(username text, lim int)
-  RETURNS TABLE(url text, title text, posted timestamp, poster text, total_votes bigint, subscriber_vote int) AS $$
+  RETURNS TABLE(linkid int, url text, title text, posted timestamp, poster text, total_votes bigint,
+                subscriber_vote int, shared bool) AS $$
 DECLARE
   subscriber_id int;
 BEGIN
@@ -67,7 +104,9 @@ BEGIN
     AS
       SELECT
         DISTINCT ON (links.url)
-        links.url,links.title,links.posted,users1.name,total_votes(links.id),user_vote(subscriber_id,links.id)
+        links.id,links.url,links.title,links.posted,users1.name,
+        total_votes(links.id),user_vote(subscriber_id,links.id),
+        has_user_shared(username, links.url)
         FROM user_subscriptions
         RIGHT JOIN user_links ON user_subscriptions.to_id=user_links.user_id
         INNER JOIN links ON link_id=links.id
@@ -80,7 +119,8 @@ $$ LANGUAGE plpgsql;
 
 DROP FUNCTION IF EXISTS get_bones(text);
 CREATE OR REPLACE FUNCTION get_bones(username text)
-  RETURNS TABLE(url text, title text, posted timestamp, poster text, total_votes bigint, subscriber_vote int) AS $$
+  RETURNS TABLE(linkid int, url text, title text, posted timestamp, poster text, total_votes bigint,
+                subscriber_vote int, shared bool) AS $$
 DECLARE
   subscriber_id int;
 BEGIN
@@ -90,7 +130,9 @@ BEGIN
     AS
       SELECT
         DISTINCT ON (links.url)
-        links.url,links.title,links.posted,users1.name,total_votes(links.id),user_vote(subscriber_id,links.id)
+        links.id,links.url,links.title,links.posted,users1.name,
+        total_votes(links.id),user_vote(subscriber_id,links.id),
+        has_user_shared(username, links.url)
         FROM user_subscriptions
         RIGHT JOIN user_links ON user_subscriptions.to_id=user_links.user_id
         INNER JOIN links ON link_id=links.id
@@ -103,7 +145,7 @@ $$ LANGUAGE plpgsql;
 
 DROP FUNCTION IF EXISTS get_bone(text);
 CREATE OR REPLACE FUNCTION get_bone(username text)
-  RETURNS TABLE(name text, url text, title text, posted timestamp, linkid int, votes bigint) AS $$
+  RETURNS TABLE(name text, url text, title text, posted timestamp, linkid int, votes bigint, shared bool) AS $$
 BEGIN
   RETURN QUERY SELECT users.name, links.url, links.title, links.posted, links.id, total_votes(links.id)
       FROM users
@@ -380,3 +422,4 @@ BEGIN
   RETURN result;
 END
 $$ LANGUAGE plpgsql;
+

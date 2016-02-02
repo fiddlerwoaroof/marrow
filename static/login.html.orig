@@ -32,7 +32,6 @@
   <script src="/lib/angular-resource.min.js"></script>
   <script src="/lib/angulartics.min.js"></script>
   <script src="/lib/angulartics-ga.min.js"></script>
-  <script src="/lib/angulartics-piwik.js"></script>
   <script src="/js/new/login.js"></script>
   <!-- CSS -->
   <link rel="stylesheet" href="/lib/formalize.css" media="screen" />
@@ -49,8 +48,8 @@
       <div class="message">{{message}}</div>
       <input type="text" ng-model="username" placeholder="Username" />
       <input type="password" ng-model="password" placeholder="Password" />
-      <button ng-click="login()" analytics-on="click" analytics-category="user" analytics-event="login">Log In</button>
-      <button ng-click="newuser()" analytics-on="click" analytics-category="user" analytics-event="new" analytics-label="{{username}}">Add User</button>
+      <button ng-click="login()">Log In</button>
+      <button ng-click="newuser()">Add User</button>
     </form>
   </div>
   </main>
