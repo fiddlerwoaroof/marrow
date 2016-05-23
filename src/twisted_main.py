@@ -28,7 +28,7 @@ class EventStream(object):
     def remove_reader(self, reader):
         idreader = id(reader)
         if idreader in self.readers:
-            del self.reader[idreader]
+            del self.readers[idreader]
     def submit_event(self, event, data):
         self.id += 1
         evt = Event(self.id, event, data)
@@ -36,24 +36,6 @@ class EventStream(object):
             evt.write_to(reader)
 
 es = EventStream()
-class EventHandler(cyclone.web.RequestHandler):
-    @cyclone.web.asynchronous
-    def get(self):
-        self.set_header('Content-Type', 'text/event-stream')
-        self.set_header('X-Accel-Buffer', 'off')
-        es.add_reader(self)
-    def on_connection_close(self):
-        es.remove_reader(self)
-
-
-class MainHandler(cyclone.web.RequestHandler):
-    def get(self):
-        self.write('''<html><head><script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
-                <script>a = new EventSource('/events');
-                        a.addEventListener('test', function(dat) { console.log(JSON.parse(dat.data)) })
-                </script></head></html>''')
-        self.finish()
-
 
 @inlineCallbacks
 def eventick(step):
@@ -67,10 +49,10 @@ def eventick(step):
 
 def get_db():
     return psycopg2.connect(
-        database=config.db,
-        user=config.user,
-        password=config.password,
-        host=config.host
+        database=config.db.db,
+        user=config.db.user,
+        password=config.db.password,
+        host=config.db.host
     )
 
 db = get_db()
@@ -85,12 +67,24 @@ def check_users():
                 last_posted=last_posted.isoformat()))
         return 'active_users', store
 
+class EventHandler(cyclone.web.RequestHandler):
+    @cyclone.web.asynchronous
+    def get(self):
+        self.set_header('Content-Type', 'text/event-stream')
+        self.set_header('Access-Control-Allow-Origin', '*')
+        self.set_header('X-Accel-Buffer', 'off')
+        es.add_reader(self)
+    def on_connection_close(self, *a):
+        print "connection closed", "args:", a
+        es.remove_reader(self)
+
+
 application = cyclone.web.Application([
     (r"/", MainHandler),
     (r"/events", EventHandler),
 ])
 
 log.startLogging(sys.stdout)
-reactor.listenTCP(8080, application)
+reactor.listenTCP(8081, application)
 reactor.callWhenRunning(eventick, check_users)
 reactor.run()

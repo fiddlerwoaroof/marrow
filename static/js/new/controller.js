@@ -90,7 +90,7 @@ marrowApp.controller('RootCtrl', function ($scope,$http,$location,$route, Subscr
         marrow.shared = true;
         if (shared === true) { $scope.update(); }
       });
-    };
+    }
   };
 
   $scope.toggleSubscribe = function (txt) {
@@ -274,14 +274,18 @@ marrowApp.controller('UserSettingCtrl', function ($scope,$http,$location) {
 });
 
 marrowApp.controller('SidebarCtrl', function ($scope,$http,$location,$route, $window, UserService) {
-  //eventSource = new EventSource("/api/user/active");
+  eventSource = new EventSource("/events");
   $scope.activeUsers = UserService.active();
+  $scope.activeUsers.hues = [];
   //$scope.activeUsers = Object.create(null);
-  //$scope.activeUsers.users = []
-  //eventSource.addEventListener("active", function(event) {
-  //  var users = $scope.activeUsers.users;
-  //  Array.prototype.splice.apply(users, [0, users.length].concat(JSON.parse(event.data).data));
-  //});
+  //$scope.activeUsers.data = [];
+  eventSource.addEventListener("active_users", function(event) {
+    var data = $scope.activeUsers.data;
+    var hues = $scope.activeUsers.hues;
+    var jsonData = JSON.parse(event.data);
+
+    Array.prototype.splice.apply(data, [0, data.length].concat(jsonData));
+  });
 
   $scope.subscriptions = function() {
     if ($location.url() !== '/subscriptions') { $location.url('/subscriptions'); }

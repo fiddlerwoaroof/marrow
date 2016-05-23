@@ -56,160 +56,189 @@ login_manager.user_loader(User.get_user)
 
 #TODO: load this from somewhere
 user_env = {}
-@user_blueprint.route('/environment')
-def get_user_env():
-    if 'username' in session:
-        username = session['username']
-        env = user_env.setdefault(username, {})
-        env['username'] = username
-        return env
-
-@user_blueprint.route('/follows/<to>')
-def follows(to):
-    result = {'follows': False, 'me': ''}
-    if 'username' in session:
-        fro = session['username']
-        db = database.get_db()
-        with db.cursor() as cur:
-            cur.callproc('follows', (fro,to))
-            result['follows'] = cur.fetchone()[0]
-            result['me'] = session['username']
-        db.commit()
-    return json.dumps(result)
-
-#@user_blueprint.route('/subscribe/<username>', methods=['POST'])
-#def subscribe(username):
-#    if 'username' in session:
-#        db = database.get_db()
-#        with db.cursor() as cur:
-#            cur.callproc('subscribe', (session['username'], username))
-#        db.commit()
-#        return json.dumps(True)
-
-# NOTE: disabled to to privacy/security concerns
-# @user_blueprint.route('/list')
-# def list_users():
-#     return json.dumps([_ for _ in users.keys()])
-
-@user_blueprint.route('/add', methods=['POST'])
-def adduser():
-    db = database.get_db()
-    result = {'status': False, 'message': ''}
-    with db.cursor() as cur:
-        obj = request.get_json();
-        try:
-            username, password = obj['username'], obj['password']
-        except KeyError:
-            print obj
-            result['message'] = 'Username required' if 'username' not in obj else 'Password required'
-        else:
-            username = username.strip().lower()
-            password = password.strip()
-            try:
-                cur.execute("INSERT INTO users (name,password,email) VALUES (%s,crypt(%s, gen_salt('bf', 11)),%s)",
-                            (username, password, 'abc@def.com'))
-                session['username'] = username
-                result['status'] = True
-                _get_users()
-                login_user(User.get_user(username))
-            except psycopg2.IntegrityError as e:
-                db.rollback()
-                if e.pgcode == '23505': #username not unique
-                    result['message'] = 'Username in use'
-                elif e.pgcode == '23502': #username empty
-                    result['message'] = 'Username required'
-                else: raise
-            else: db.commit()
-    return json.dumps(result)
-
-@user_blueprint.route('/active')
-def active():
-    result = dict(status=False, data=[])
-    with database.get_db() as db:
-        with db.cursor() as cur:
-            cur.execute("SELECT * FROM recently_active_users ORDER BY posted DESC LIMIT 10")
-            store = result['data']
-            for id,name,last_posted in cur.fetchall():
-                store.append(
-                    dict(
-                        id=id,
-                        name=name,
-                        last_posted=last_posted.isoformat()
-                    )
-                )
-    return (json.dumps(result), 200, {'Content-Type': 'application/json'})
-
-@user_blueprint.route('/following')
-@login_required
-def following():
-    result = dict(status=False, data=[])
-    if 'username' in session:
-        username = session['username']
-        with database.get_db() as db:
-            with db.cursor() as cur:
-                print 'current_user:', current_user.id
-                cur.callproc('get_subscriptions', (current_user.id,))
-                result['data'] = [x[0] for x in cur.fetchall()]
-
-    return json.dumps(result)
-
-@user_blueprint.route('/check')
-def checkuser(): return json.dumps({'result': 'username' in session})
 
 import os, base64
 def gen_ak(db):
     return ak
-
-@user_blueprint.route('/env/<user>', methods=['POST'])
-def getenv(user): pass
-
-@user_blueprint.route('/change-password', methods=['POST'])
-def changepass():
-    obj = request.get_json();
-    result = dict(status=False, message='')
-    if 'username' in session:
-        username, old_password, new_password = session['username'], obj['old_password'], obj['new_password']
-        user = users[username]
-        if old_password == user['password']:
+class UserController(object):
+    @classmethod
+    def following(self):
+        result = dict(status=False, data=[])
+        if 'username' in session:
+            username = session['username']
             with database.get_db() as db:
                 with db.cursor() as cur:
-                    cur.execute('UPDATE users SET password=%s WHERE name=%s', (new_password, username))
-                    _get_users(db)
-                    result['status'] = True
-        else:
-            result['message'] = 'Wrong Username or Password'
-    else:
-        result['message'] = 'Wrong Username or Password'
-    return json.dumps(result)
+                    print 'current_user:', current_user.id
+                    cur.callproc('get_subscriptions', (current_user.id,))
+                    result['data'] = [x[0] for x in cur.fetchall()]
 
-@user_blueprint.route('/login', methods=['POST'])
-@cross_origin(allow_headers='Content-Type')
-def login():
-    obj = request.get_json();
-    result = {'status': False, 'message': ''}
-    username, password = obj['username'], obj['password']
-    username = username.strip().lower()
-    password = password.strip()
-    user = users.get(username, {})
-    with database.get_db() as db:
-        with db.cursor() as cur:
-            cur.callproc('check_password', (username, password))
-            success = cur.fetchone()[0]
-            if success:
-                if 'ak' in request.args and request.args['ak']:
-                    ak = base64.b64encode(os.urandom(24))
-                    with database.get_db() as db:
-                        with db.cursor() as cur:
-                            cur.callproc('put_ak', (username, ak))
-                    result = {'success': True, 'ak': ak}
-                else:
-                    user = User.get_user(username)
-                    login_user(user)
-                    session['username'] = username
-                    result['status'] = True
+        return json.dumps(result)
+
+    @classmethod
+    def checkuser(self):
+        return json.dumps({'result': 'username' in session})
+
+    @classmethod
+    def getenv(user): pass
+
+    @classmethod
+    def changepass(self):
+        ## NOTE: figure out if this actually works. . . .
+        obj = request.get_json();
+        result = dict(status=False, message='')
+        if 'username' in session:
+            username, old_password, new_password = session['username'], obj['old_password'], obj['new_password']
+            user = users[username]
+            if old_password == user['password']:
+                with database.get_db() as db:
+                    with db.cursor() as cur:
+                        cur.execute('UPDATE users SET password=%s WHERE name=%s', (new_password, username))
+                        _get_users(db)
+                        result['status'] = True
             else:
                 result['message'] = 'Wrong Username or Password'
-    return json.dumps(result)
+        else:
+            result['message'] = 'Wrong Username or Password'
+        return json.dumps(result)
+
+    @classmethod
+    def reputation(cls, username):
+        result = None
+        with database.get_db() as db:
+            with db.cursor() as cur:
+                if username is None:
+                    obj = request.get_json(force=True)
+                    obj = set(obj)
+                    result = {}
+                    for n in obj:
+                        cur.callproc('total_user_votes', (n,))
+                        dbresult, = cur.fetchone()
+                        result[n] = int(round(bias(dbresult)))
+                    if result == {}: result = None
+                else:
+                    cur.callproc('total_user_votes', (username,))
+                    dbresult, = cur.fetchone()
+                    result =  int(round(bias(dbresult)))
+        return result
+
+    @classmethod
+    def logout(cls):
+        to = request.args.get('to', '/')
+        session.pop('username', None)
+        logout_user()
+        return redirect(to)
+
+    @classmethod
+    def login(cls):
+        obj = request.get_json();
+        result = {'status': False, 'message': ''}
+        username, password = obj['username'], obj['password']
+        username = username.strip().lower()
+        password = password.strip()
+        user = users.get(username, {})
+        with database.get_db() as db:
+            with db.cursor() as cur:
+                cur.callproc('check_password', (username, password))
+                success = cur.fetchone()[0]
+                if success:
+                    if 'ak' in request.args and request.args['ak']:
+                        ak = base64.b64encode(os.urandom(24))
+                        with database.get_db() as db:
+                            with db.cursor() as cur:
+                                cur.callproc('put_ak', (username, ak))
+                        result = {'success': True, 'ak': ak}
+                    else:
+                        user = User.get_user(username)
+                        login_user(user)
+                        session['username'] = username
+                        result['status'] = True
+                else:
+                    result['message'] = 'Wrong Username or Password'
+        return json.dumps(result)
+
+    user_env = {}
+    @classmethod
+    def get_user_env(cls):
+        if 'username' in session:
+            username = session['username']
+            env = cls.user_env.setdefault(username, {})
+            env['username'] = username
+            return json.dumps(env)
+
+    @classmethod
+    def follows(cls, to):
+        result = {'follows': False, 'me': ''}
+        if 'username' in session:
+            fro = session['username']
+            db = database.get_db()
+            with db.cursor() as cur:
+                cur.callproc('follows', (fro,to))
+                result['follows'] = cur.fetchone()[0]
+                result['me'] = session['username']
+            db.commit()
+        return json.dumps(result)
+
+    #@user_blueprint.route('/subscribe/<username>', methods=['POST'])
+    #def subscribe(username):
+    #    if 'username' in session:
+    #        db = database.get_db()
+    #        with db.cursor() as cur:
+    #            cur.callproc('subscribe', (session['username'], username))
+    #        db.commit()
+    #        return json.dumps(True)
+    
+    # NOTE: disabled to to privacy/security concerns
+    # @user_blueprint.route('/list')
+    # def list_users():
+    #     return json.dumps([_ for _ in users.keys()])
+    
+    @classmethod
+    def adduser(cls):
+        db = database.get_db()
+        result = {'status': False, 'message': ''}
+        with db.cursor() as cur:
+            obj = request.get_json();
+            try:
+                username, password = obj['username'], obj['password']
+            except KeyError:
+                print obj
+                result['message'] = 'Username required' if 'username' not in obj else 'Password required'
+            else:
+                username = username.strip().lower()
+                password = password.strip()
+                try:
+                    cur.execute("INSERT INTO users (name,password,email) VALUES (%s,crypt(%s, gen_salt('bf', 11)),%s)",
+                                (username, password, 'abc@def.com'))
+                    session['username'] = username
+                    result['status'] = True
+                    _get_users()
+                    login_user(User.get_user(username))
+                except psycopg2.IntegrityError as e:
+                    db.rollback()
+                    if e.pgcode == '23505': #username not unique
+                        result['message'] = 'Username in use'
+                    elif e.pgcode == '23502': #username empty
+                        result['message'] = 'Username required'
+                    else: raise
+                else: db.commit()
+        return json.dumps(result)
+
+    @classmethod
+    def active(cls):
+        result = dict(status=False, data=[])
+        with database.get_db() as db:
+            with db.cursor() as cur:
+                cur.execute("SELECT * FROM recently_active_users ORDER BY posted DESC LIMIT 10")
+                store = result['data']
+                for id,name,last_posted in cur.fetchall():
+                    store.append(
+                        dict(
+                            id=id,
+                            name=name,
+                            last_posted=last_posted.isoformat()
+                        )
+                    )
+        return (json.dumps(result), 200, {'Content-Type': 'application/json'})
 
 import functools
 def wrap_result(result_key):
@@ -241,34 +270,53 @@ def bias(x):
     return result
 adj_factor = m / bias(m)
 
- 
+@user_blueprint.route('/env/<user>', methods=['POST'])
+def getenv(user):
+    return UserController.getenv()
+
+@user_blueprint.route('/change-password', methods=['POST'])
+def changepass():
+    return UserController.changepass()
+
+
 @user_blueprint.route('/reputation', methods=['POST'],defaults={'username':None})
 @user_blueprint.route('/reputation/<username>')
 @login_required
 @wrap_result('reputation')
 def reputation(username):
-    result = None
-    with database.get_db() as db:
-        with db.cursor() as cur:
-            if username is None:
-                obj = request.get_json(force=True)
-                obj = set(obj)
-                result = {}
-                for n in obj:
-                    cur.callproc('total_user_votes', (n,))
-                    dbresult, = cur.fetchone()
-                    result[n] = int(round(bias(dbresult)))
-                if result == {}: result = None
-            else:
-                cur.callproc('total_user_votes', (username,))
-                dbresult, = cur.fetchone()
-                result =  int(round(bias(dbresult)))
-    return result
+    return UserController.reputation(username)
 
+ 
 @user_blueprint.route('/logout')
 def logout():
-    to = request.args.get('to', '/')
-    session.pop('username', None)
-    logout_user()
-    return redirect(to)
+    return UserController.logout()
 
+@user_blueprint.route('/active')
+def active():
+    return UserController.active()
+
+@user_blueprint.route('/add', methods=['POST'])
+def adduser():
+    return UserController.adduser();
+
+@user_blueprint.route('/follows/<to>')
+def follows(to):
+    return UserController.follows(to)
+
+@user_blueprint.route('/environment')
+def get_user_env():
+    return UserController.get_user_env()
+
+@user_blueprint.route('/login', methods=['POST'])
+@cross_origin(allow_headers='Content-Type')
+def login():
+    return UserController.login();
+
+@user_blueprint.route('/following')
+@login_required
+def following():
+    return UserController.following()
+
+@user_blueprint.route('/check')
+def checkuser():
+    return UserController.checkuser()
